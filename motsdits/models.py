@@ -28,12 +28,15 @@ class MDQBaseModel(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     # Static score, float to allow for some funky scoring models
-    score = models.FloatField()
+    score = models.FloatField(default=0)
 
 
 class Action(MDQBaseModel):
     '''Action objects, should only be created within the admin'''
     verb = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.verb
 
 
 class Tag(MDQBaseModel):
@@ -59,7 +62,17 @@ class Item(MDQBaseModel):
     website = models.URLField(null=True, blank=True)
 
     # Tags related to this specific item
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, null=True, blank=True)
+
+    def __str__(self):
+        '''Display version'''
+        return "({}) {}".format(self.type, self.name)
+
+
+class Photo(MDQBaseModel):
+    '''Photos for MDQ'''
+
+    picture = models.FileField(upload_to='motsditsv2')
 
 
 class MotDit(MDQBaseModel):
@@ -69,6 +82,10 @@ class MotDit(MDQBaseModel):
 
     what = models.ForeignKey(Item, related_name='what')
     where = models.ForeignKey(Item, related_name='where')
+
+    def __str__(self):
+        '''Stringified version'''
+        return "{} {} at {}".format(self.action, self.what, self.where)
 
     @property
     def favourites(self):

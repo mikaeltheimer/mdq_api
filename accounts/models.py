@@ -38,24 +38,34 @@ class MDQUser(AbstractBaseUser):
         unique=True,
     )
 
+    # A unique username
+    username = models.CharField(max_length=255, unique=True)
+
+    # User personal information
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
 
+    # Access control information
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
+    # Social information
+    likes = models.ManyToManyField('motsdits.MotDit', null=True, blank=True, related_name='likes')
+    favourites = models.ManyToManyField('motsdits.MotDit', null=True, blank=True, related_name='favourites')
+
+    # Other requirements
     objects = MDQUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     def get_full_name(self):
         # The user is identified by their email address
-        return self.email
+        return self.username
 
     def get_short_name(self):
         # The user is identified by their email address
-        return self.email
+        return self.username
 
     def __str__(self):              # __unicode__ on Python 2
         return self.email
