@@ -43,7 +43,7 @@ INSTALLED_APPS = (
     #'rest_framework.authtoken', # enable when setting up token-based authentication
 
     # Admin plugins
-    'suit',
+    #'suit',
     'django_extensions',
     'south',
 
