@@ -18,12 +18,12 @@ class MDQUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, first_name, last_name, password):
+    def create_superuser(self, email, first_name, last_name, password, username):
         """
         Creates and saves a superuser with the given email, date of
         birth and password.
         """
-        user = self.create_user(email, first_name, last_name, password=password)
+        user = self.create_user(email, first_name, last_name, username=username, password=password)
         user.is_admin = True
         user.save(using=self._db)
         return user
