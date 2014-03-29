@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 class MDQUserManager(BaseUserManager):
     '''Updates the base user manager to provide some additional functionality'''
-    def create_user(self, email, first_name, last_name, password=None):
+    def create_user(self, email, first_name, last_name, username=None, password=None):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -12,7 +12,7 @@ class MDQUserManager(BaseUserManager):
         if not email:
             raise ValueError('Users must have an email address')
 
-        user = self.model(email=self.normalize_email(email), first_name=first_name, last_name=last_name)
+        user = self.model(email=self.normalize_email(email), first_name=first_name, last_name=last_name, username=username)
 
         user.set_password(password)
         user.save(using=self._db)
