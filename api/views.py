@@ -135,21 +135,24 @@ class MotDitViewSet(viewsets.ModelViewSet):
             # @TODO: Increase score every time this happens!
             pass
 
-        for tag_name in data.get('tags', []):
-            try:
-                tag = Tag.objects.get(name__iexact=tag_name)
-            except Tag.DoesNotExist:
-                tag = Tag.objects.create(
-                    name=tag_name,
-                    created_by=request.user
-                )
+        if isinstance(data.get('tags', []), list):
+            for tag_name in data.get('tags', []):
+                try:
+                    tag = Tag.objects.get(name__iexact=tag_name)
+                except Tag.DoesNotExist:
+                    tag = Tag.objects.create(
+                        name=tag_name,
+                        created_by=request.user
+                    )
 
-            # Add the tag to the what, if specified
-            if what:
-                what.tags.add(tag)
+                # Add the tag to the what, if specified
+                if what:
+                    what.tags.add(tag)
 
-            # And add the tag to the where as well
-            if where:
-                where.tags.add(tag)
+                # And add the tag to the where as well
+                if where:
+                    where.tags.add(tag)
+        else:
+            return Response({'error': 'Tags must be supplied as a list of strings'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         return Response(self.serializer_class(motdit).data, status=status.HTTP_201_CREATED)
