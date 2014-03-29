@@ -138,3 +138,10 @@ REST_FRAMEWORK = {
     'PAGINATE_BY_PARAM': 'count',  # Allow client to override, using `?page_size=xxx`.
     'MAX_PAGINATE_BY': 100             # Maximum limit allowed when using `?page_size=xxx`.
 }
+
+
+# Allow for local configuration
+try:
+    from local_settings import *
+except ImportError:
+    pass
