@@ -33,10 +33,10 @@ class MDQBaseModel(models.Model):
 
 class Action(MDQBaseModel):
     '''Action objects, should only be created within the admin'''
-    verb = models.CharField(max_length=255)
+    verb = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
-        return self.verb
+        return str(self.verb)
 
 
 class Tag(MDQBaseModel):
@@ -69,12 +69,6 @@ class Item(MDQBaseModel):
         return "({}) {}".format(self.type, self.name)
 
 
-class Photo(MDQBaseModel):
-    '''Photos for MDQ'''
-
-    picture = models.FileField(upload_to='motsditsv2')
-
-
 class MotDit(MDQBaseModel):
     '''Mots-dits are a grouping of action, items and photos'''
 
@@ -91,3 +85,31 @@ class MotDit(MDQBaseModel):
     def favourites(self):
         '''Returns the number of times this mot-dit has been favourited'''
         return get_user_model().objects.filter(favourites=self).count()
+
+
+class Photo(MDQBaseModel):
+    '''Photos for MDQ'''
+
+    picture = models.FileField(upload_to='motsditsv2')
+    motdit = models.ForeignKey(MotDit, related_name='photos')
+
+
+class Story(MDQBaseModel):
+    '''Comment on a Mot-Dit'''
+    text = models.TextField()
+    motdit = models.ForeignKey(MotDit, related_name='stories')
+
+
+class News(MDQBaseModel):
+    '''News item'''
+
+    # And related models
+    motdit = models.ForeignKey(MotDit)
+    photo = models.ForeignKey(Photo, null=True, blank=True)
+    story = models.ForeignKey(Story, null=True, blank=True)
+
+
+class Comment(MDQBaseModel):
+    '''Mot-dit comment'''
+    text = models.TextField()
+    news_item = models.ForeignKey(News, related_name='comments')

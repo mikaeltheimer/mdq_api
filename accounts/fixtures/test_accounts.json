@@ -1,0 +1,18 @@
+[
+    {
+        "fields": {
+            "email": "me@hownowstephen.com",
+            "favourites": [],
+            "first_name": "Stephen",
+            "is_active": true,
+            "is_admin": true,
+            "last_login": "2014-03-25T16:57:44",
+            "last_name": "Young",
+            "likes": [],
+            "password": "pbkdf2_sha256$12000$k3ODd7iPjS3t$BHzDizw3lKTgK85UqKFeTPiBkHrzDrrEf70apE802ZE=",
+            "username": "admin"
+        },
+        "model": "accounts.mdquser",
+        "pk": 1
+    }
+]

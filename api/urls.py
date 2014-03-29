@@ -21,7 +21,7 @@ router.register(r'items', views.ItemViewSet)
 urlpatterns = patterns(
     '',
 
-    url(r'v2/items/autocomplete/(?P<name>[^/+])/??', views.ItemAutocomplete.as_view()),
+    url(r'v2/items/autocomplete/(?P<name>[^/]+)/??', views.ItemAutocomplete.as_view()),
 
     # Basic API
     url(r'v2/', include(router.urls)),
