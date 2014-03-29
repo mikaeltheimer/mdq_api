@@ -1,0 +1,15 @@
+[
+    {
+        "fields": {
+            "client_id": "da343e2a18dc2b26cbee",
+            "client_secret": "f9a286fd88a0c2c4690151ee4976aceb8597e522",
+            "client_type": 0,
+            "name": "test-api-client",
+            "redirect_uri": "http://localhost/test",
+            "url": "http://localhost/",
+            "user": null
+        },
+        "model": "oauth2.client",
+        "pk": 1
+    }
+]

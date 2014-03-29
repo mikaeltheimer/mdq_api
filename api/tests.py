@@ -5,6 +5,33 @@ from rest_framework.test import APITestCase
 
 from motsdits.models import MotDit
 from api.serializers import motsdits as motsdits_serializers
+import json
+
+
+NEW_PASSWORD = 'password'
+
+
+def ensure_access_token(api_client, user):
+    '''Loads an access token to add to requests'''
+    from provider.oauth2.models import Client
+    client = Client.objects.all()[0]
+
+    # Set a new password so we have direct access to the value
+    user.set_password(NEW_PASSWORD)
+    user.save()
+
+    grant_data = {
+        'client_id': client.client_id,
+        'client_secret': client.client_secret,
+        'grant_type': 'password',
+        'username': user.email,
+        'password': NEW_PASSWORD
+    }
+
+    # Request an access token
+    response = api_client.post("/oauth2/access_token/", grant_data, format='multipart')
+    data = json.loads(response.content)
+    return api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + data['access_token'])
 
 
 class ItemTests(APITestCase):
@@ -16,14 +43,15 @@ class ItemTests(APITestCase):
 class MotDitTests(APITestCase):
     '''Tests for the mot-dit modules'''
 
-    fixtures = ['test_accounts.json', 'test_motsdits.json']
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json']
+
+    def setUp(self):
+        '''Sets up the necessary access token'''
+        user = get_user_model().objects.get(username='admin')
+        ensure_access_token(self.client, user)
 
     def test_create_motdit(self):
         '''Ensure we can create a motdit'''
-
-        # Load user
-        user = get_user_model().objects.get(username='admin')
-        self.client.force_authenticate(user=user)
 
         action = 'eat'
         tags = sorted(['fries', 'cheese curds', 'poutine', 'delicious'])
