@@ -1,0 +1,107 @@
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+  </head>
+
+  <body>
+
+    <script type='text/javascript'>
+      $(document).ready(function(){
+
+        /**
+         * API Library (requires jQuery)
+         */
+        function MDQApi(client_id, client_secret) {
+
+          // Client ID and secret supplied by the application
+          this.client_id = client_id;
+          this.client_secret = client_secret;
+
+          // The access token to be used
+          this.access_token = null;
+
+          // Actual request wrapper
+          this.request = function(method, path, data, callback, content_type){
+
+            if(!content_type){
+              content_type = 'application/json';
+              data = JSON.stringify(data);
+              processData = false;
+            }else{
+              processData = true;
+            }
+
+            var headers = {'content-type': content_type};
+
+            // Once the access token is set, add it to requests
+            if(this.access_token) headers['Authorization'] = 'Bearer ' + this.access_token;
+
+            return $.ajax({
+                url: 'http://api.motsditsquebec.com/' + path,
+                data: data,
+                success: callback,
+                type: method,
+                headers: headers,
+                processData: processData
+            })
+          };
+
+          // Wrap the normal HTTP methods
+          this.get = function(path, callback, ctype){ return this.request('GET', path, null, callback, ctype); };
+          this.post = function(path, data, callback, ctype){ return this.request('POST', path, data, callback, ctype); };
+          this.put = function(path, data, callback, ctype){ return this.request('PUT', path, data, callback, ctype); };
+          this.delete = function(path, data, callback, ctype){ return this.request('DELETE', path, data, callback, ctype); };
+
+          // And handle the oauth2 authorization implicitly
+          this.authorize = function(email, password, post_authorize){
+
+            var self = this;
+            this.post('/oauth2/access_token', {
+                'client_id': this.client_id,
+                'client_secret': this.client_secret,
+                'grant_type': 'password',
+                'username': email,
+                'password': password
+            }, function(response){
+              self.access_token = response.access_token;
+              if(post_authorize) post_authorize();
+            }, 'application/x-www-form-urlencoded');
+          };
+
+        };
+
+        var api = new MDQApi('291f1dda02ea49f16baa', 'c0635020316d5a697f5935cf5d44c769fd454b76');
+
+        var test_email = 'test@motsditsquebec.com';
+        var test_password = 'test';
+
+        api.authorize(test_email, test_password, function(){
+            // Create a new motdit
+            var new_motdit = {
+                'what': 'test an api',
+                'where': 'montreal',
+                'action': 'test',
+                'tags': ['created', 'new', 'awesome']
+            };
+
+            // Simple response handler
+            var log_response = function(r){ console.log(r); };
+
+            // Create a mot-dit
+            api.post('/api/v2/motsdits/', new_motdit, log_response);
+
+            // Like a mot-dit
+            api.post('/api/v2/motsdits/1/like/', {}, log_response);
+
+            // List all mots-dits
+            api.get('/api/v2/motsdits/', function(response){
+                for(var i in response.motsdits){
+                    console.log(response.motsdits[i]);
+                }
+            });
+        });
+      });
+    </script>
+  </body>
+
+</html>

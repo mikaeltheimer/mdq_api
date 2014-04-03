@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Javascript Example &mdash; MDQ Api 1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="MDQ Api 1.0 documentation" href="index.html"/>
+        <link rel="prev" title="&lt;no title&gt;" href="oauth2.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> MDQ Api</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Javascript Example</a></li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MDQ Api</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Javascript Example</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/javascript.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
+  <div class="section" id="javascript-example">
+<h1>Javascript Example<a class="headerlink" href="#javascript-example" title="Permalink to this headline">¶</a></h1>
+<p>This is a pure-javascript example. It&#8217;s worth noting that the API key generation stage should NOT be done in pure frontend javascript in a production setting. The proper approach is:</p>
+<ol class="arabic simple">
+<li>Receive request from user to log-in</li>
+<li>Pass credentials to a backend service that queries the API (server side)</li>
+<li>Store the access key in the session cookie</li>
+<li>Access only the session key via Javascript</li>
+</ol>
+<p>For the purposes of example, this API provides all of the functionality on the frontend</p>
+<p>The following is a simple example of an API wrapper library for the MDQ API, it provides the same methods
+and functionality as the Python example</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="cm">/**</span>
+<span class="cm"> * API Library (requires jQuery)</span>
+<span class="cm"> */</span>
+<span class="kd">function</span> <span class="nx">MDQApi</span><span class="p">(</span><span class="nx">client_id</span><span class="p">,</span> <span class="nx">client_secret</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Client ID and secret supplied by the application</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">client_id</span> <span class="o">=</span> <span class="nx">client_id</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">client_secret</span> <span class="o">=</span> <span class="nx">client_secret</span><span class="p">;</span>
+
+  <span class="c1">// The access token to be used</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">access_token</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+  <span class="c1">// Actual request wrapper</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">request</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">method</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">content_type</span><span class="p">){</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">content_type</span><span class="p">){</span>
+      <span class="nx">content_type</span> <span class="o">=</span> <span class="s1">&#39;application/json&#39;</span><span class="p">;</span>
+      <span class="nx">data</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+      <span class="nx">processData</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+      <span class="nx">processData</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;content-type&#39;</span><span class="o">:</span> <span class="nx">content_type</span><span class="p">};</span>
+
+    <span class="c1">// Once the access token is set, add it to requests</span>
+    <span class="k">if</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">access_token</span><span class="p">)</span> <span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Bearer &#39;</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">access_token</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="nx">$</span><span class="p">.</span><span class="nx">ajax</span><span class="p">({</span>
+        <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;http://api.motsditsquebec.com/&#39;</span> <span class="o">+</span> <span class="nx">path</span><span class="p">,</span>
+        <span class="nx">data</span><span class="o">:</span> <span class="nx">data</span><span class="p">,</span>
+        <span class="nx">success</span><span class="o">:</span> <span class="nx">callback</span><span class="p">,</span>
+        <span class="nx">type</span><span class="o">:</span> <span class="nx">method</span><span class="p">,</span>
+        <span class="nx">headers</span><span class="o">:</span> <span class="nx">headers</span><span class="p">,</span>
+        <span class="nx">processData</span><span class="o">:</span> <span class="nx">processData</span>
+    <span class="p">})</span>
+  <span class="p">};</span>
+
+  <span class="c1">// Wrap the normal HTTP methods</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">get</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">ctype</span><span class="p">){</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">ctype</span><span class="p">);</span> <span class="p">};</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">post</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">ctype</span><span class="p">){</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">ctype</span><span class="p">);</span> <span class="p">};</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">put</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">ctype</span><span class="p">){</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">ctype</span><span class="p">);</span> <span class="p">};</span>
+  <span class="k">this</span><span class="p">.</span><span class="k">delete</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">ctype</span><span class="p">){</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="s1">&#39;DELETE&#39;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">,</span> <span class="nx">ctype</span><span class="p">);</span> <span class="p">};</span>
+
+  <span class="c1">// And handle the oauth2 authorization implicitly</span>
+  <span class="c1">// WARNING: This is for demonstration purposes, and should NOT be used client-side</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">authorize</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">email</span><span class="p">,</span> <span class="nx">password</span><span class="p">,</span> <span class="nx">post_authorize</span><span class="p">){</span>
+
+    <span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">&#39;/oauth2/access_token&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;client_id&#39;</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">client_id</span><span class="p">,</span>
+        <span class="s1">&#39;client_secret&#39;</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">client_secret</span><span class="p">,</span>
+        <span class="s1">&#39;grant_type&#39;</span><span class="o">:</span> <span class="s1">&#39;password&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;username&#39;</span><span class="o">:</span> <span class="nx">email</span><span class="p">,</span>
+        <span class="s1">&#39;password&#39;</span><span class="o">:</span> <span class="nx">password</span>
+    <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">){</span>
+      <span class="nx">self</span><span class="p">.</span><span class="nx">access_token</span> <span class="o">=</span> <span class="nx">response</span><span class="p">.</span><span class="nx">access_token</span><span class="p">;</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">post_authorize</span><span class="p">)</span> <span class="nx">post_authorize</span><span class="p">();</span>
+    <span class="p">},</span> <span class="s1">&#39;application/x-www-form-urlencoded&#39;</span><span class="p">);</span>
+  <span class="p">};</span>
+
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The following is a sample flow that performs authorization and then interacts directly with the API
+All output will be printed directly to the console</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">api</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MDQApi</span><span class="p">(</span><span class="s1">&#39;291f1dda02ea49f16baa&#39;</span><span class="p">,</span> <span class="s1">&#39;c0635020316d5a697f5935cf5d44c769fd454b76&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">test_email</span> <span class="o">=</span> <span class="s1">&#39;test@motsditsquebec.com&#39;</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">test_password</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span><span class="p">;</span>
+
+<span class="nx">api</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="nx">test_email</span><span class="p">,</span> <span class="nx">test_password</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="c1">// Create a new motdit</span>
+    <span class="kd">var</span> <span class="nx">new_motdit</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;what&#39;</span><span class="o">:</span> <span class="s1">&#39;test an api&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;where&#39;</span><span class="o">:</span> <span class="s1">&#39;montreal&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;action&#39;</span><span class="o">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;tags&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">,</span> <span class="s1">&#39;new&#39;</span><span class="p">,</span> <span class="s1">&#39;awesome&#39;</span><span class="p">]</span>
+    <span class="p">};</span>
+
+    <span class="c1">// Simple response handler</span>
+    <span class="kd">var</span> <span class="nx">log_response</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">r</span><span class="p">){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">r</span><span class="p">);</span> <span class="p">};</span>
+
+    <span class="c1">// Create a mot-dit</span>
+    <span class="nx">api</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">&#39;/api/v2/motsdits/&#39;</span><span class="p">,</span> <span class="nx">new_motdit</span><span class="p">,</span> <span class="nx">log_response</span><span class="p">);</span>
+
+    <span class="c1">// Like a mot-dit</span>
+    <span class="nx">api</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="s1">&#39;/api/v2/motsdits/1/like/&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="nx">log_response</span><span class="p">);</span>
+
+    <span class="c1">// List all mots-dits</span>
+    <span class="nx">api</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/api/v2/motsdits/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">){</span>
+        <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="k">in</span> <span class="nx">response</span><span class="p">.</span><span class="nx">motsdits</span><span class="p">){</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">motsdits</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+        <span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="oauth2.html" class="btn btn-neutral" title="&lt;no title&gt;"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014, Stephen Young.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

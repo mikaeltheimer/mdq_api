@@ -1,0 +1,268 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Mots-dits &mdash; MDQ Api 1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="MDQ Api 1.0 documentation" href="index.html"/>
+        <link rel="next" title="Javascript Example" href="javascript.html"/>
+        <link rel="prev" title="Mots-Dits Quebec API Documentation" href="index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> MDQ Api</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Mots-dits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-mots-dits">Creating Mots-dits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#retrieving-mots-dits">Retrieving Mots-dits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#retrieving-many-mots-dits-under-development">Retrieving Many Mots-dits (under development)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="javascript.html">Javascript Example</a></li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">MDQ Api</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Mots-dits</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/motsdits.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
+  <div class="section" id="mots-dits">
+<h1>Mots-dits<a class="headerlink" href="#mots-dits" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://api.motsditsquebec.com/api/v2/motsdits/">http://api.motsditsquebec.com/api/v2/motsdits/</a></p>
+<p>The motsdits endpoint is one of the two most central features of the API, and provides much of the core interaction that the application relies on</p>
+<div class="section" id="creating-mots-dits">
+<h2>Creating Mots-dits<a class="headerlink" href="#creating-mots-dits" title="Permalink to this headline">¶</a></h2>
+<p><strong>POST</strong> <a class="reference external" href="http://api.motsditsquebec.com/api/v2/motsdits/">http://api.motsditsquebec.com/api/v2/motsdits/</a></p>
+<p>Each mot-dit has 4 basic attributes:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="11%" />
+<col width="89%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>what</strong></td>
+<td>The object/action being referenced (eg. A burger, skiing)</td>
+</tr>
+<tr class="row-even"><td><strong>where</strong></td>
+<td>Where the object is (eg. Burger Royal, Le Plateau)</td>
+</tr>
+<tr class="row-odd"><td><strong>action</strong></td>
+<td>One of the core available actions (aller, sortir, visiter, faire, manger, magasiner, dormir)</td>
+</tr>
+<tr class="row-even"><td><strong>tags</strong></td>
+<td>Free-form meta-tags about the motdit (eg. Awesome, Great night out)</td>
+</tr>
+</tbody>
+</table>
+<p>These are the basic requirement for creating a new mots-dit, of which only <strong>two</strong> are required:</p>
+<ol class="arabic simple">
+<li>One of <strong>what</strong> or <strong>where</strong> (can also be both)</li>
+<li>The <strong>action</strong></li>
+</ol>
+<p>All other attributes are non-mandatory. A sample mot-dit creation request may look like:</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s1">&#39;what&#39;</span><span class="o">:</span> <span class="s1">&#39;create an example motsdits&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;where&#39;</span><span class="o">:</span> <span class="s1">&#39;api documentation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;action&#39;</span><span class="o">:</span> <span class="s1">&#39;visiter&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;tags&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;created&#39;</span><span class="p">,</span> <span class="s1">&#39;new&#39;</span><span class="p">,</span> <span class="s1">&#39;motdit&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="retrieving-mots-dits">
+<h2>Retrieving Mots-dits<a class="headerlink" href="#retrieving-mots-dits" title="Permalink to this headline">¶</a></h2>
+<p><strong>GET</strong> <a class="reference external" href="http://api.motsditsquebec.com/api/v2/motsdits/">http://api.motsditsquebec.com/api/v2/motsdits/</a><strong>{id}</strong>/</p>
+<p>Retrieves a mot-dit by ID, looks like:</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;created_by&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;username&quot;</span><span class="o">:</span> <span class="s2">&quot;hownowstephen&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;action&quot;</span><span class="o">:</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;what&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;test an api&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;score&quot;</span><span class="o">:</span> <span class="mf">0.0</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;where&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;montreal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;score&quot;</span><span class="o">:</span> <span class="mf">0.0</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;score&quot;</span><span class="o">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="s2">&quot;likes&quot;</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;favourites&quot;</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;tags&quot;</span><span class="o">:</span> <span class="p">[</span>
+        <span class="s2">&quot;created&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;new&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;awesome&quot;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>One thing to note: <strong>the mot-dit object is slightly different when retrieving</strong> - both the &#8220;what&#8221; and the &#8220;where&#8221; fields are references to <a class="reference external" href="item.html">item</a> objects, and so after being created, they are displayed with their name, score and id within the mot-dit</p>
+</div>
+<div class="section" id="retrieving-many-mots-dits-under-development">
+<h2>Retrieving Many Mots-dits (under development)<a class="headerlink" href="#retrieving-many-mots-dits-under-development" title="Permalink to this headline">¶</a></h2>
+<p><strong>GET</strong> <a class="reference external" href="http://api.motsditsquebec.com/api/v2/motsdits/">http://api.motsditsquebec.com/api/v2/motsdits/</a></p>
+<p>Motsdits are loaded in a paginated list, and requests can be filtered using GET parameters</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="88%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>order_by</strong></td>
+<td>Sets the sorting of the motsdits, accepts: <strong>created</strong>, <strong>updated</strong>, <strong>likes</strong> or <strong>favourites</strong></td>
+</tr>
+<tr class="row-even"><td><strong>page</strong></td>
+<td>Sets the page number, defaults to 1</td>
+</tr>
+<tr class="row-odd"><td><strong>per_page</strong></td>
+<td>Sets the number per page, max of 50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="javascript.html" class="btn btn-neutral float-right" title="Javascript Example"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Mots-Dits Quebec API Documentation"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014, Stephen Young.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
