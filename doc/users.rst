@@ -51,6 +51,17 @@ This will follow the user with the supplied ID, and will succeed (HTTP 204) for 
 
 This will unfollow the user with the supplied ID and will succeed (HTTP 204) for all user ids except the ID of the acting user (**you can't follow yourself**)
 
+Viewing followers / following
+-----------------------------
+
+**GET** http://api.motsditsquebec.com/api/v2/users/:ID/followers/
+
+The followers endpoint returns a paginated list of user objects (see above for parameters) that represent the users that are **following** the user with id **ID**
+
+**GET** http://api.motsditsquebec.com/api/v2/users/:ID/following/
+
+The following endpoint returns a paginated list of user objects (see above for parameters) that represent the users that the user with id **ID** is following
+
 
 
 .. _item: items.html
