@@ -153,6 +153,34 @@ REST_FRAMEWORK = {
     'MAX_PAGINATE_BY': 100             # Maximum limit allowed when using `?page_size=xxx`.
 }
 
+# Mots-dits news
+NEWS_CREATED_MOTDIT = 'motdit-created'
+NEWS_UPDATED_MOTDIT = 'motdit-updated'
+NEWS_LIKED_MOTDIT = 'motdit-liked'
+NEWS_FAVOURITED_MOTDIT = 'motdit-favourited'
+
+# Photo news
+NEWS_LIKED_PHOTO = 'photo-liked'
+
+# Story news
+NEWS_LIKED_STORY = 'story-liked'
+
+NEWS_TYPE_CHOICES = (
+
+    # Mots-dits news
+    (NEWS_CREATED_MOTDIT, 'Created Mot-Dit'),
+    (NEWS_UPDATED_MOTDIT, 'Updated Mot-Dit'),
+    (NEWS_LIKED_MOTDIT, 'Liked Mot-Dit'),
+    (NEWS_FAVOURITED_MOTDIT, 'Favourited Mot-Dit'),
+
+    # Photo news
+    (NEWS_LIKED_PHOTO, 'Liked Photo'),
+
+    # Story news
+    (NEWS_LIKED_STORY, 'Liked Photo'),
+
+)
+
 
 # Allow for local configuration
 try:

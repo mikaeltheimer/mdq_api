@@ -117,6 +117,8 @@ class Story(MDQBaseModel):
 class News(MDQBaseModel):
     '''News item'''
 
+    action = models.CharField(max_length=50, choices=settings.NEWS_TYPE_CHOICES)
+
     # And related models
     motdit = models.ForeignKey(MotDit)
     photo = models.ForeignKey(Photo, null=True, blank=True)
