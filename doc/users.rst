@@ -40,6 +40,19 @@ Logging in and out
 Performing authentication for user accounts requires an oauth_ key - please review the oauth_ documentation for further information on logging in and out.
 
 
+Following other users
+---------------------
+
+**POST** http://api.motsditsquebec.com/api/v2/users/:ID/follow/
+
+This will follow the user with the supplied ID, and will succeed (HTTP 204) for all user ids except the ID of the acting user (**you can't follow yourself**)
+
+**DELETE** http://api.motsditsquebec.com/api/v2/users/:ID/follow/
+
+This will unfollow the user with the supplied ID and will succeed (HTTP 204) for all user ids except the ID of the acting user (**you can't follow yourself**)
+
+
+
 .. _item: items.html
 .. _motsdits: motsdits.html
 .. _score: scores.html
