@@ -100,7 +100,7 @@ class ItemTests(MDQApiTest):
 
 
 class MotDitTests(MDQApiTest):
-    '''Tests for the mot-dit modules'''
+    '''Tests for the mot-dit API'''
 
     fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json']
 
@@ -207,7 +207,7 @@ class MotDitTests(MDQApiTest):
 
 
 class PhotoTests(MDQApiTest):
-    '''Tests for the mot-dit modules'''
+    '''Tests for the photo API'''
 
     fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_photos.json']
 
@@ -261,7 +261,7 @@ class PhotoTests(MDQApiTest):
 
 
 class StoryTests(MDQApiTest):
-    '''Tests for the mot-dit modules'''
+    '''Tests for the story API'''
 
     fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_stories.json']
 
@@ -310,3 +310,37 @@ class StoryTests(MDQApiTest):
         # And verify that the delete worked
         story = Story.objects.get(pk=1)
         self.assertNotIn(self.user, story.likes.all())
+
+
+class NewsTests(MDQApiTest):
+    '''Tests for the news API'''
+
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_news.json', 'test_comments.json']
+
+    def test_news_comments(self):
+        '''Tests retrieving all comments for a news item'''
+
+        response = self.client.get('/api/v2/news/1/comments/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # And make sure that each comment returned is related to this news item
+        for comment in response.data:
+            self.assertEqual(comment['news_item'], 1)
+
+
+class CommentTests(MDQApiTest):
+    '''Tests for the comment API'''
+
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_news.json', 'test_comments.json']
+
+    def test_create_comment(self):
+        '''Tests that we can create a comment'''
+
+        test_comment = 'this is a comment on a news item'
+
+        response = self.client.post('/api/v2/comments/', {
+            'text': test_comment,
+            'news': 1
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['text'], test_comment)

@@ -124,8 +124,23 @@ class News(MDQBaseModel):
     photo = models.ForeignKey(Photo, null=True, blank=True)
     story = models.ForeignKey(Story, null=True, blank=True)
 
+    def __str__(self):
+        return str(self.action)
+
 
 class Comment(MDQBaseModel):
-    '''Mot-dit comment'''
+    '''News comment'''
+
     text = models.TextField()
     news_item = models.ForeignKey(News, related_name='comments')
+
+    @property
+    def teaser(self):
+        '''Returns a truncated version of the story'''
+        if len(self.text) < 40:
+            return self.text
+        else:
+            return self.text[:40] + '...'
+
+    def __str__(self):
+        return self.teaser

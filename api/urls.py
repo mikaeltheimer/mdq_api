@@ -17,6 +17,8 @@ router.register(r'motsdits', views.MotDitViewSet)
 router.register(r'items', views.ItemViewSet)
 router.register(r'photos', views.PhotoViewSet)
 router.register(r'stories', views.StoryViewSet)
+router.register(r'news', views.NewsViewSet)
+router.register(r'comments', views.CommentViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browseable API.

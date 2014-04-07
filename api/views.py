@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
 
-from motsdits.models import Action, Item, MotDit, Tag, Photo, Story
+from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
 
 import serializers.motsdits as motsdits_serializers
 import serializers.motsdits.compact as motsdits_compact
@@ -267,13 +267,13 @@ class StoryViewSet(viewsets.ModelViewSet):
         '''Create a Story object'''
 
         # Create the story
-        photo = Story.objects.create(
+        story = Story.objects.create(
             text=request.DATA['text'],
             motdit=MotDit.objects.get(pk=request.DATA['motdit']),
             created_by=request.user
         )
 
-        return Response(self.serializer_class(photo).data, status=status.HTTP_201_CREATED)
+        return Response(self.serializer_class(story).data, status=status.HTTP_201_CREATED)
 
     @action(methods=['POST', 'DELETE'])
     def like(self, request, pk=None):
@@ -290,3 +290,46 @@ class StoryViewSet(viewsets.ModelViewSet):
         elif request.method == 'DELETE':
             story.likes.remove(request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class NewsViewSet(viewsets.ModelViewSet):
+    '''Viewset for Mot-dit objects'''
+
+    model = News
+    serializer_class = motsdits_serializers.NewsSerializer
+    paginate_by = 25
+    paginate_by_param = 'limit'
+
+    @link()
+    def comments(self, request, pk=None):
+        '''Retrieves a list of stories related to this item'''
+        # @TODO: Add pagination
+        serializer = motsdits_compact.CompactCommentSerializer
+        queryset = Comment.objects.filter(news_item=pk)
+        return Response(serializer(queryset, many=True).data)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    '''Viewset for Mot-dit objects'''
+
+    model = Comment
+    serializer_class = motsdits_serializers.CommentSerializer
+    paginate_by = 25
+    paginate_by_param = 'limit'
+
+    def create(self, request):
+        '''Create a Comment object'''
+
+        if 'news_item' in request.DATA:
+            news_item = request.DATA['news_item']
+        else:
+            news_item = request.DATA['news']
+
+        # Create the story
+        comment = Comment.objects.create(
+            text=request.DATA['text'],
+            news_item=News.objects.get(pk=news_item),
+            created_by=request.user
+        )
+
+        return Response(self.serializer_class(comment).data, status=status.HTTP_201_CREATED)

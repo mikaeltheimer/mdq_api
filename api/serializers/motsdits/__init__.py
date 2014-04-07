@@ -1,4 +1,4 @@
-from motsdits.models import MotDit, Item, Photo, Story
+from motsdits.models import MotDit, Item, Photo, Story, News, Comment
 
 from rest_framework import serializers
 
@@ -83,7 +83,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 
 
 class StorySerializer(serializers.ModelSerializer):
-    '''Serializes the photo object'''
+    '''Serializes the story object'''
 
     motdit = MotDitSerializer()
     created_by = accounts_compact.CompactUserSerializer()
@@ -92,3 +92,29 @@ class StorySerializer(serializers.ModelSerializer):
         model = Story
         depth = 1
         fields = ('id', 'text', 'created_by', 'motdit', )
+
+
+class NewsSerializer(serializers.ModelSerializer):
+    '''Serializes the news object'''
+
+    motdit = MotDitSerializer()
+    photo = motsdits_compact.CompactPhotoSerializer()
+    story = motsdits_compact.CompactStorySerializer()
+    created_by = accounts_compact.CompactUserSerializer()
+
+    class Meta:
+        model = News
+        depth = 1
+        fields = ('id', 'motdit', 'photo', 'story', 'created_by', )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    '''Serializes a comment object'''
+
+    news_item = NewsSerializer()
+    created_by = accounts_compact.CompactUserSerializer()
+
+    class Meta:
+        model = Comment
+        depth = 1
+        fields = ('id', 'text', 'created_by', 'news_item', )
