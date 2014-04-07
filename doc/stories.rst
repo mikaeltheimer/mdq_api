@@ -1,9 +1,9 @@
-Photos
-======
+Stories
+=======
 
-http://api.motsditsquebec.com/api/v2/photos/
+http://api.motsditsquebec.com/api/v2/stories/
 
-Photos 
+Stories are descriptions of a user_'s relationship to a Mot-dit, by way of recommendation, anecdote etc.
 
 
 Listing Stories
@@ -14,7 +14,9 @@ Listing Stories
 Stories have the following attributes:
 
 +----------------+--------------------------------------------------------+-------------------------------+
-|   **motdit**   |      The motdit_ object this photo is related to       | when compact, just the **ID** |
+|    **text**    |                 The text of the story                  |                               |
++----------------+--------------------------------------------------------+-------------------------------+
+| **motdit**     | The motdit_ object this photo is related to            | when compact, just the **ID** |
 +----------------+--------------------------------------------------------+-------------------------------+
 | **created_by** | A condensed user_ object                               |                               |
 +----------------+--------------------------------------------------------+-------------------------------+
@@ -46,27 +48,28 @@ Your POST data should look like:
     }
 
 
-Deleting Photos
+Deleting Stories
 ---------------
 
-**DELETE** http://api.motsditsquebec.com/api/v2/photos/:ID/
+**DELETE** http://api.motsditsquebec.com/api/v2/stories/:ID/
 
-Users may delete any photos that belong to them. This endpoint will respond with HTTP 204 if successful, otherwise with a 403 (forbidden)
+Users may delete any stories that belong to them. This endpoint will respond with HTTP 204 if successful, otherwise with a 403 (forbidden)
 
 
-Liking Photos
+Liking Stories
 -------------
 
-**POST** http://api.motsditsquebec.com/api/v2/photos/:ID/like/
+**POST** http://api.motsditsquebec.com/api/v2/stories/:ID/like/
 
-This will create a new like for the mot-dit. A user can only like a mot-dit once, but the request will always succeed
+This will create a new like for the story. A user can only like a story once, but the request will always succeed
 
-**DELETE** http://api.motsditsquebec.com/api/v2/motsdits/:ID/like/
+**DELETE** http://api.motsditsquebec.com/api/v2/stories/:ID/like/
 
-This will delete a like on a photo. It will always succeed, even if the user doesn't yet like the photo 
+This will delete a like on a story. It will always succeed, even if the user doesn't yet like the story 
 
 
 .. _item: items.html
 .. _motsdits: motsdits.html
 .. _score: scores.html
 .. _photo: photos.html
+.. _user: users.html

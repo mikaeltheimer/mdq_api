@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from motsdits.models import Item, Photo
+from motsdits.models import Item, Photo, Story
 
 from api.serializers.accounts import compact
 
@@ -25,3 +25,13 @@ class CompactPhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
         fields = ('id', 'url', 'created_by', 'score', 'motdit', )
+
+
+class CompactStorySerializer(serializers.ModelSerializer):
+    '''Creates a smaller version of a Photo object'''
+
+    created_by = compact.CompactUserSerializer()
+
+    class Meta:
+        model = Story
+        fields = ('id', 'text', 'created_by', 'score', 'motdit', )

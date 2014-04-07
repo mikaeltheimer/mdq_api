@@ -175,6 +175,16 @@ class MotDitTests(MDQApiTest):
         for photo in response.data:
             self.assertEqual(photo.motdit, 1)
 
+    def test_motdit_stories(self):
+        '''Tests listing of stories for a motdit'''
+
+        response = self.client.get('/api/v2/motsdits/1/stories/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Make sure it only returns photos for MotDit #1
+        for story in response.data:
+            self.assertEqual(story.motdit, 1)
+
     def test_favourite_motdit(self):
         '''Performs a "like" of the mot-dit by the admin user'''
 

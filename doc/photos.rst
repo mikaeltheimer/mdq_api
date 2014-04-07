@@ -65,9 +65,9 @@ Liking Photos
 
 **POST** http://api.motsditsquebec.com/api/v2/photos/:ID/like/
 
-This will create a new like for the mot-dit. A user can only like a mot-dit once, but the request will always succeed
+This will create a new like for the photo. A user can only like a photo once, but the request will always succeed
 
-**DELETE** http://api.motsditsquebec.com/api/v2/motsdits/:ID/like/
+**DELETE** http://api.motsditsquebec.com/api/v2/photos/:ID/like/
 
 This will delete a like on a photo. It will always succeed, even if the user doesn't yet like the photo 
 

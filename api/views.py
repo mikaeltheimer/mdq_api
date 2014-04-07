@@ -144,6 +144,14 @@ class MotDitViewSet(viewsets.ModelViewSet):
         queryset = Photo.objects.filter(motdit=pk)
         return Response(serializer(queryset, many=True).data)
 
+    @link()
+    def stories(self, request, pk=None):
+        '''Retrieves a list of stories related to this item'''
+        # @TODO: Add pagination
+        serializer = motsdits_compact.CompactStorySerializer
+        queryset = Story.objects.filter(motdit=pk)
+        return Response(serializer(queryset, many=True).data)
+
     def create(self, request):
         '''Create a MotDit object'''
         data = request.DATA
