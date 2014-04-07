@@ -377,3 +377,19 @@ class UserViewSet(viewsets.ModelViewSet):
         elif request.method == 'DELETE':
             user.followers.remove(request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @link()
+    def following(self, request, pk=None):
+        '''Retrieves a list of motsdits this user has liked'''
+        # @TODO: Add pagination
+        serializer = accounts_serializers.UserSerializer
+        queryset = get_user_model().objects.filter(followers=pk)
+        return Response(serializer(queryset, many=True).data)
+
+    @link()
+    def followers(self, request, pk=None):
+        '''Retrieves a list of motsdits this user has liked'''
+        # @TODO: Add pagination
+        serializer = accounts_serializers.UserSerializer
+        queryset = get_user_model().objects.filter(following=pk)
+        return Response(serializer(queryset, many=True).data)
