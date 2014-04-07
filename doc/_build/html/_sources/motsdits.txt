@@ -43,7 +43,7 @@ All other attributes are non-mandatory. A sample mot-dit creation request may lo
 Retrieving Mots-dits
 --------------------
 
-**GET** http://api.motsditsquebec.com/api/v2/motsdits/**{id}**/
+**GET** http://api.motsditsquebec.com/api/v2/motsdits/:ID/
 
 Retrieves a mot-dit by ID, looks like:
 

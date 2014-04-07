@@ -3,9 +3,11 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from motsdits.models import MotDit
+from motsdits.models import MotDit, Item
 from api.serializers import motsdits as motsdits_serializers
 import json
+
+from django.db.models import Q
 
 
 NEW_PASSWORD = 'password'
@@ -34,21 +36,63 @@ def ensure_access_token(api_client, user):
     return api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + data['access_token'])
 
 
-class ItemTests(APITestCase):
-
-    def test_update_item(self):
-        '''Tests pushing an update to an item'''
-
-
-class MotDitTests(APITestCase):
-    '''Tests for the mot-dit modules'''
-
-    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json']
+class MDQApiTest(APITestCase):
+    '''Provides common setup for the MDQ API'''
 
     def setUp(self):
         '''Sets up the necessary access token'''
         user = get_user_model().objects.get(username='admin')
         ensure_access_token(self.client, user)
+
+
+class ItemTests(MDQApiTest):
+    '''Tests for the item API'''
+
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json']
+
+    def test_autocomplete(self):
+        '''Tests that autocomplete returns the proper items'''
+
+        items = [i.name for i in Item.objects.all()]
+
+        for query in ('test', 'test%20what'):
+
+            response = self.client.get('/api/v2/items/autocomplete/{}/'.format(query))
+
+            test_items = sorted(i for i in items if i.lower().startswith(query.replace('%20', ' ')))
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(sorted(response.data), test_items)
+
+    def test_update_item(self):
+        '''Tests pushing an update to an item'''
+
+        test_address = "1234 fake street"
+        test_website = 'http://valid-website.com'
+
+        response = self.client.patch('/api/v2/items/1/', {
+            'address': test_address,
+            'website': test_website
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['address'], test_address)
+        self.assertEqual(response.data['website'], test_website)
+
+    def test_item_related(self):
+        '''Tests the related motsdits list of an item'''
+
+        item = Item.objects.get(pk=1)
+
+        ids = sorted([m.id for m in MotDit.objects.filter(Q(what=item) | Q(where=item))])
+        response = self.client.get('/api/v2/items/1/related/')
+        self.assertEqual(sorted([m['id'] for m in response.data]), ids)
+
+
+class MotDitTests(MDQApiTest):
+    '''Tests for the mot-dit modules'''
+
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json']
 
     def test_create_motdit(self):
         '''Ensure we can create a motdit'''

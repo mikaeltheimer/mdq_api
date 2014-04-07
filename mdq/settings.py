@@ -26,7 +26,7 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-APPEND_SLASH = False
+APPEND_SLASH = True
 
 
 # Application definition
@@ -109,12 +109,17 @@ STATIC_ROOT = '/home/motsdits/api/static/'
 
 STATIC_URL = '/static/'
 
-# Default to storing everyhing in Amazon S3
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = "AKIAIMQSPV3SJ4Y7GI3Q"
-AWS_SECRET_ACCESS_KEY = "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"
-AWS_STORAGE_BUCKET_NAME = "motsditsv2"
-AWS_QUERYSTRING_AUTH = False
+
+if not DEBUG:
+    # When in production, default to storing everyhing in Amazon S3
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    AWS_ACCESS_KEY_ID = "AKIAIMQSPV3SJ4Y7GI3Q"
+    AWS_SECRET_ACCESS_KEY = "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"
+    AWS_STORAGE_BUCKET_NAME = "motsditsv2"
+    AWS_QUERYSTRING_AUTH = False
+else:
+    pass
+
 
 AUTH_USER_MODEL = 'accounts.MDQUser'
 

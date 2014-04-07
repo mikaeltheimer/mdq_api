@@ -44,19 +44,17 @@ class ItemViewSet(viewsets.ModelViewSet):
         serializer = motsdits_serializers.MotDitSerializer
         queryset = MotDit.objects.filter(Q(what=pk) | Q(where=pk))
 
-        return Response(serializer(queryset).data)
+        return Response(serializer(queryset, many=True).data)
 
 
 class ItemAutocomplete(APIView):
-
-    serializer_class = motsdits_serializers.ItemSerializer
+    '''Item Autocomplete view'''
 
     #@decorators.method_decorator(ensure_csrf_cookie)
     def get(self, request, name=None):
-        '''Updates a user profile photo'''
-
-        queryset = Item.objects.filter(name__icontains=name)
-        return Response(self.serializer_class(queryset).data)
+        '''Provides the autocomplete action for items'''
+        # @TODO: add filter params
+        return Response([item.name for item in Item.objects.filter(name__icontains=name)[:10]])
 
 
 def resolve_item(value, item_type, user=None):

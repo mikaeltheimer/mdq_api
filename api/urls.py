@@ -21,6 +21,7 @@ router.register(r'items', views.ItemViewSet)
 urlpatterns = patterns(
     '',
 
+    # Custom autocomplete endpoint
     url(r'v2/items/autocomplete/(?P<name>[^/]+)/??', views.ItemAutocomplete.as_view()),
 
     # Basic API
