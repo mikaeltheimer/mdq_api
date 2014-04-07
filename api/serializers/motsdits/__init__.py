@@ -86,6 +86,7 @@ class StorySerializer(serializers.ModelSerializer):
     '''Serializes the photo object'''
 
     motdit = MotDitSerializer()
+    created_by = accounts_compact.CompactUserSerializer()
 
     class Meta:
         model = Story

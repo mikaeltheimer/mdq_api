@@ -108,15 +108,15 @@ class MotDitViewSet(viewsets.ModelViewSet):
     def like(self, request, pk=None):
         '''Like or unlike a motdit'''
 
+        motdit = MotDit.objects.get(pk=pk)
+
         # User wants to like this mot-dit
         if request.method == 'POST':
-            motdit = MotDit.objects.get(pk=pk)
             motdit.likes.add(request.user)
             return Response(status=status.HTTP_201_CREATED)
 
         # Otherwise we can do a DELETE
         elif request.method == 'DELETE':
-            motdit = MotDit.objects.get(pk=pk)
             motdit.likes.remove(request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -124,15 +124,15 @@ class MotDitViewSet(viewsets.ModelViewSet):
     def favourite(self, request, pk=None):
         '''Like or unlike a motdit'''
 
+        motdit = MotDit.objects.get(pk=pk)
+
         # User wants to like this mot-dit
         if request.method == 'POST':
-            motdit = MotDit.objects.get(pk=pk)
             motdit.favourites.add(request.user)
             return Response(status=status.HTTP_201_CREATED)
 
         # Otherwise we can do a DELETE
         elif request.method == 'DELETE':
-            motdit = MotDit.objects.get(pk=pk)
             motdit.favourites.remove(request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -209,7 +209,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
     paginate_by_param = 'limit'
 
     def create(self, request):
-        '''Create a MotDit object'''
+        '''Create a Photo object'''
         data = request.DATA
 
         # Allow picture or photo as the key
@@ -221,7 +221,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
         except KeyError:
             return Response({'error': 'Must supply a photo'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        # Create the motdit
+        # Create the photo
         photo = Photo.objects.create(
             picture=photo_file,
             motdit=MotDit.objects.get(pk=data['motdit']),
@@ -232,17 +232,17 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST', 'DELETE'])
     def like(self, request, pk=None):
-        '''Like or unlike a motdit'''
+        '''Like or unlike a photo'''
+
+        photo = Photo.objects.get(pk=pk)
 
         # User wants to like this photo
         if request.method == 'POST':
-            photo = Photo.objects.get(pk=pk)
             photo.likes.add(request.user)
             return Response(status=status.HTTP_201_CREATED)
 
         # Otherwise we can do a DELETE
         elif request.method == 'DELETE':
-            photo = Photo.objects.get(pk=pk)
             photo.likes.remove(request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -254,3 +254,31 @@ class StoryViewSet(viewsets.ModelViewSet):
     serializer_class = motsdits_serializers.StorySerializer
     paginate_by = 25
     paginate_by_param = 'limit'
+
+    def create(self, request):
+        '''Create a Story object'''
+
+        # Create the story
+        photo = Story.objects.create(
+            text=request.DATA['text'],
+            motdit=MotDit.objects.get(pk=request.DATA['motdit']),
+            created_by=request.user
+        )
+
+        return Response(self.serializer_class(photo).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['POST', 'DELETE'])
+    def like(self, request, pk=None):
+        '''Like or unlike a story'''
+
+        story = Story.objects.get(pk=pk)
+
+        # User wants to like this photo
+        if request.method == 'POST':
+            story.likes.add(request.user)
+            return Response(status=status.HTTP_201_CREATED)
+
+        # Otherwise we can do a DELETE
+        elif request.method == 'DELETE':
+            story.likes.remove(request.user)
+            return Response(status=status.HTTP_204_NO_CONTENT)

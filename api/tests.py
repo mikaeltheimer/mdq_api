@@ -239,7 +239,7 @@ class PhotoTests(MDQApiTest):
     def test_unlike_photo(self):
         '''Performs an unlike action on a Photo'''
 
-        self.user.liked_photos.add(Story.objects.get(pk=1))
+        self.user.liked_photos.add(Photo.objects.get(pk=1))
 
         # Delete the like
         response = self.client.delete('/api/v2/photos/1/like/', format='json')
