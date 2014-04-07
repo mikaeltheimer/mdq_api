@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from motsdits.models import MotDit, Item
+from motsdits.models import MotDit, Item, Photo
 from api.serializers import motsdits as motsdits_serializers
 import json
 
@@ -41,8 +41,8 @@ class MDQApiTest(APITestCase):
 
     def setUp(self):
         '''Sets up the necessary access token'''
-        user = get_user_model().objects.get(username='admin')
-        ensure_access_token(self.client, user)
+        self.user = get_user_model().objects.get(username='admin')
+        ensure_access_token(self.client, self.user)
 
 
 class ItemTests(MDQApiTest):
@@ -129,22 +129,14 @@ class MotDitTests(MDQApiTest):
     def test_like_motdit(self):
         '''Performs a "like" of the mot-dit by the admin user'''
 
-        # Load user
-        user = get_user_model().objects.get(username='admin')
-        self.client.force_authenticate(user=user)
-
         response = self.client.post('/api/v2/motsdits/1/like/', format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         motdit = MotDit.objects.get(pk=1)
-        self.assertIn(user, motdit.likes.all())
+        self.assertIn(self.user, motdit.likes.all())
 
     def test_unlike_motdit(self):
         '''Performs an unlike action on a MotDit'''
-
-        # Load user
-        user = get_user_model().objects.get(username='admin')
-        self.client.force_authenticate(user=user)
 
         # Delete the like
         response = self.client.delete('/api/v2/motsdits/1/like/', format='json')
@@ -152,4 +144,54 @@ class MotDitTests(MDQApiTest):
 
         # And verify that the delete worked
         motdit = MotDit.objects.get(pk=1)
-        self.assertNotIn(user, motdit.likes.all())
+        self.assertNotIn(self.user, motdit.likes.all())
+
+
+class PhotoTests(MDQApiTest):
+    '''Tests for the mot-dit modules'''
+
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_photos.json']
+
+    def test_create_photo(self):
+        '''Create a photo'''
+
+        with open('motsditsv2/auxvivres.jpg') as fp:
+            photo_obj = {
+                'motdit': 1,
+                'picture': fp.read()
+            }
+
+            response = self.client.post('/api/v2/photos/', photo_obj, format='multipart')
+
+            print response.content
+
+            # Make sure it was created and linked to the proper motdit
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(response.data['motdit']['id'], 1)
+
+    def test_delete_photo(self):
+        '''Delete a photo'''
+
+        response = self.client.delete('/api/v2/photos/1/')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Photo.objects.filter(pk=1).count(), 0)
+
+    def test_like_photo(self):
+        '''Performs a "like" of the mot-dit by the admin user'''
+
+        response = self.client.post('/api/v2/photos/1/like/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        photo = Photo.objects.get(pk=1)
+        self.assertIn(self.user, photo.likes.all())
+
+    def test_unlike_motdit(self):
+        '''Performs an unlike action on a MotDit'''
+
+        # Delete the like
+        response = self.client.delete('/api/v2/photos/1/like/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # And verify that the delete worked
+        photo = Photo.objects.get(pk=1)
+        self.assertNotIn(self.user, photo.likes.all())

@@ -1,4 +1,4 @@
-from motsdits.models import MotDit, Item
+from motsdits.models import MotDit, Item, Photo
 
 from rest_framework import serializers
 
@@ -63,3 +63,20 @@ class ItemSerializer(serializers.ModelSerializer):
         model = Item
         depth = 1
         fields = ('id', 'name', 'address', 'website', 'tags', 'created_by', 'score', )
+
+
+class PhotoSerializer(serializers.ModelSerializer):
+    '''Serializes the photo object'''
+
+    url = serializers.SerializerMethodField('get_picture_url')
+    motdit = MotDitSerializer()
+    created_by = accounts_compact.CompactUserSerializer()
+
+    def get_picture_url(self, obj):
+        '''Gets the url of the actual picture object'''
+        return obj.picture.url
+
+    class Meta:
+        model = Photo
+        depth = 1
+        fields = ('id', 'url', 'created_by', 'motdit', )

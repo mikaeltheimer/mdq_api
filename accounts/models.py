@@ -53,6 +53,8 @@ class MDQUser(AbstractBaseUser):
     likes = models.ManyToManyField('motsdits.MotDit', null=True, blank=True, related_name='likes')
     favourites = models.ManyToManyField('motsdits.MotDit', null=True, blank=True, related_name='favourites')
 
+    liked_photos = models.ManyToManyField('motsdits.Photo', null=True, blank=True, related_name='likes')
+
     # Other requirements
     objects = MDQUserManager()
 
