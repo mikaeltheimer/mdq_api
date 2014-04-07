@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from motsdits.models import Item
+from motsdits.models import Item, Photo
+
+from api.serializers.accounts import compact
 
 
 class CompactItemSerializer(serializers.ModelSerializer):
@@ -8,3 +10,18 @@ class CompactItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ('id', 'name', 'score', )
+
+
+class CompactPhotoSerializer(serializers.ModelSerializer):
+    '''Creates a smaller version of a Photo object'''
+
+    url = serializers.SerializerMethodField('get_picture_url')
+    created_by = compact.CompactUserSerializer()
+
+    def get_picture_url(self, obj):
+        '''Gets the url of the actual picture object'''
+        return obj.picture.url
+
+    class Meta:
+        model = Photo
+        fields = ('id', 'url', 'created_by', 'score', 'motdit', )

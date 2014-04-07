@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from datetime import datetime
+from django.db.models import Q
 
 
 ITEM_TYPE_CHOICES = (
@@ -68,6 +69,11 @@ class Item(MDQBaseModel):
         '''Display version'''
         return "({}) {}".format(self.type, self.name)
 
+    @property
+    def motsdits(self):
+        '''Retrieves all the motsdits related to this model'''
+        return MotDit.objects.filter(Q(what=self) | Q(where=self))
+
 
 class MotDit(MDQBaseModel):
     '''Mots-dits are a grouping of action, items and photos'''
@@ -98,6 +104,14 @@ class Story(MDQBaseModel):
     '''Comment on a Mot-Dit'''
     text = models.TextField()
     motdit = models.ForeignKey(MotDit, related_name='stories')
+
+    @property
+    def teaser(self):
+        '''Returns a truncated version of the story'''
+        if len(self.text) < 40:
+            return self.text
+        else:
+            return self.text[:40] + '...'
 
 
 class News(MDQBaseModel):

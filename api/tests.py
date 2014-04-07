@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from motsdits.models import MotDit, Item, Photo
+from motsdits.models import MotDit, Item, Photo, Story
 from api.serializers import motsdits as motsdits_serializers
 import json
 
@@ -88,6 +88,16 @@ class ItemTests(MDQApiTest):
         response = self.client.get('/api/v2/items/1/related/')
         self.assertEqual(sorted([m['id'] for m in response.data]), ids)
 
+    def test_item_photos(self):
+        '''Test the item photos list'''
+
+        item = Item.objects.get(pk=1)
+        ids = [motdit.id for motdit in item.motsdits]
+        response = self.client.get('/api/v2/items/1/photos/')
+
+        for photo in response.data:
+            self.assertIn(photo.motdit, ids)
+
 
 class MotDitTests(MDQApiTest):
     '''Tests for the mot-dit modules'''
@@ -115,7 +125,7 @@ class MotDitTests(MDQApiTest):
         '''Testing deleting of a motdit'''
 
         response = self.client.delete('/api/v2/motsdits/1/')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_list_motdits(self):
         '''Test to make sure the list view returns the right data'''
@@ -125,6 +135,15 @@ class MotDitTests(MDQApiTest):
 
         manually_serialized = motsdits_serializers.MotDitSerializer(MotDit.objects.all(), many=True).data
         self.assertEqual(response.data['results'], manually_serialized)
+
+    def test_flag_motdit(self):
+        '''Tests that flagging a motdit sets the flag value 1 higher'''
+
+        flags = MotDit.objects.get(pk=1).flags
+
+        response = self.client.post('/api/v2/motsdits/1/flag/')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(MotDit.objects.get(pk=1).flags, flags + 1)
 
     def test_like_motdit(self):
         '''Performs a "like" of the mot-dit by the admin user'''
@@ -146,6 +165,36 @@ class MotDitTests(MDQApiTest):
         motdit = MotDit.objects.get(pk=1)
         self.assertNotIn(self.user, motdit.likes.all())
 
+    def test_motdit_photos(self):
+        '''Tests listing of photos for a motdit'''
+
+        response = self.client.get('/api/v2/motsdits/1/photos/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Make sure it only returns photos for MotDit #1
+        for photo in response.data:
+            self.assertEqual(photo.motdit, 1)
+
+    def test_favourite_motdit(self):
+        '''Performs a "like" of the mot-dit by the admin user'''
+
+        response = self.client.post('/api/v2/motsdits/1/favourite/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        motdit = MotDit.objects.get(pk=1)
+        self.assertIn(self.user, motdit.favourites.all())
+
+    def test_unfavourite_motdit(self):
+        '''Performs an unlike action on a MotDit'''
+
+        # Delete the like
+        response = self.client.delete('/api/v2/motsdits/1/favourite/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # And verify that the delete worked
+        motdit = MotDit.objects.get(pk=1)
+        self.assertNotIn(self.user, motdit.favourites.all())
+
 
 class PhotoTests(MDQApiTest):
     '''Tests for the mot-dit modules'''
@@ -158,12 +207,10 @@ class PhotoTests(MDQApiTest):
         with open('motsditsv2/auxvivres.jpg') as fp:
             photo_obj = {
                 'motdit': 1,
-                'picture': fp.read()
+                'picture': fp
             }
 
             response = self.client.post('/api/v2/photos/', photo_obj, format='multipart')
-
-            print response.content
 
             # Make sure it was created and linked to the proper motdit
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -176,6 +223,10 @@ class PhotoTests(MDQApiTest):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Photo.objects.filter(pk=1).count(), 0)
 
+    def test_delete_other_user_photo(self):
+        '''Tests deletion of a story created by another user'''
+        raise NotImplemented
+
     def test_like_photo(self):
         '''Performs a "like" of the mot-dit by the admin user'''
 
@@ -185,8 +236,10 @@ class PhotoTests(MDQApiTest):
         photo = Photo.objects.get(pk=1)
         self.assertIn(self.user, photo.likes.all())
 
-    def test_unlike_motdit(self):
-        '''Performs an unlike action on a MotDit'''
+    def test_unlike_photo(self):
+        '''Performs an unlike action on a Photo'''
+
+        self.user.liked_photos.add(Story.objects.get(pk=1))
 
         # Delete the like
         response = self.client.delete('/api/v2/photos/1/like/', format='json')
@@ -195,3 +248,55 @@ class PhotoTests(MDQApiTest):
         # And verify that the delete worked
         photo = Photo.objects.get(pk=1)
         self.assertNotIn(self.user, photo.likes.all())
+
+
+class StoryTests(MDQApiTest):
+    '''Tests for the mot-dit modules'''
+
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_stories.json']
+
+    def test_create_story(self):
+        '''Tests the creation of a new story'''
+
+        test_story = 'this is a sample story'
+
+        response = self.client.post('/api/v2/stories/', {
+            'text': test_story,
+            'motdit': 1
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['text'], 'this is a sample story')
+
+    def test_delete_story(self):
+        '''Tests the deletion of a story'''
+
+        response = self.client.delete('/api/v2/stories/1/')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Story.objects.filter(pk=1).count(), 0)
+
+    def test_delete_other_user_story(self):
+        '''Tests deletion of a story created by another user'''
+        raise NotImplemented
+
+    def test_like_story(self):
+        '''Tests liking of stories'''
+
+        response = self.client.post('/api/v2/stories/1/like/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        story = Story.objects.get(pk=1)
+        self.assertIn(self.user, story.likes.all())
+
+    def test_unlike_story(self):
+        '''Tests unliking of a story'''
+
+        self.user.liked_stories.add(Story.objects.get(pk=1))
+
+        # Delete a like
+        response = self.client.delete('/api/v2/stories/1/like/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # And verify that the delete worked
+        story = Story.objects.get(pk=1)
+        self.assertNotIn(self.user, story.likes.all())

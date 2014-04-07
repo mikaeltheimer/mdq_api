@@ -1,4 +1,4 @@
-from motsdits.models import MotDit, Item, Photo
+from motsdits.models import MotDit, Item, Photo, Story
 
 from rest_framework import serializers
 
@@ -80,3 +80,14 @@ class PhotoSerializer(serializers.ModelSerializer):
         model = Photo
         depth = 1
         fields = ('id', 'url', 'created_by', 'motdit', )
+
+
+class StorySerializer(serializers.ModelSerializer):
+    '''Serializes the photo object'''
+
+    motdit = MotDitSerializer()
+
+    class Meta:
+        model = Story
+        depth = 1
+        fields = ('id', 'text', 'created_by', 'motdit', )

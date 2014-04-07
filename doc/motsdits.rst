@@ -40,6 +40,7 @@ All other attributes are non-mandatory. A sample mot-dit creation request may lo
         'tags': ['created', 'new', 'motdit']
     }
 
+
 Retrieving Mots-dits
 --------------------
 
@@ -79,7 +80,7 @@ Retrieves a mot-dit by ID, looks like:
 One thing to note: **the mot-dit object is slightly different when retrieving** - both the "what" and the "where" fields are references to item_ objects, and so after being created, they are displayed with their name, score and id within the mot-dit
 
 
-Retrieving Many Mots-dits (under development)
+Listing Mots-dits (under development)
 ---------------------------------------------
 
 **GET** http://api.motsditsquebec.com/api/v2/motsdits/
@@ -95,4 +96,41 @@ Motsdits are loaded in a paginated list, and requests can be filtered using GET 
 +--------------+--------------------------------------------------------------------------------------------------+
 
 
-.. _item: item.html
+Liking and Favouriting Mots-dits
+--------------------------------
+
+**POST** http://api.motsditsquebec.com/api/v2/motsdits/:ID/like/
+
+This will create a new like for the mot-dit. A user can only like a mot-dit once, but the request will always succeed
+
+**DELETE** http://api.motsditsquebec.com/api/v2/motsdits/:ID/like/
+
+This will delete a like for the mot-dit. Will ensure there is no like, the request will always succeed (even if the user didn't previously like the object).
+
+The API for favouriting is the exact same, so:
+
+**POST** http://api.motsditsquebec.com/api/v2/motsdits/:ID/favourite/
+
+**DELETE** http://api.motsditsquebec.com/api/v2/motsdits/:ID/favourite/
+
+
+Mot-dit Photos
+--------------
+
+**GET** http://api.motsditsquebec.com/api/v2/motsdits/:ID/photos/
+
+This endpoint provides a **paginated** list of compact photo_ objects that are related to this specific Mot-dit, See the photo_ documentation for a full list of query parameters available
+
+
+Mot-dit Stories
+--------------
+
+**GET** http://api.motsditsquebec.com/api/v2/motsdits/:ID/stories/
+
+This endpoint provides a **paginated** list of story_ objects that are related to this specific Mot-dit. See the story_ documentation for a full list of query parameters available
+
+
+
+.. _item: items.html
+.. _photo: photos.html
+.. _story: stories.html
