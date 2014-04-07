@@ -4,15 +4,37 @@
             "email": "me@hownowstephen.com",
             "favourites": [],
             "first_name": "Stephen",
+            "following": [],
             "is_active": true,
             "is_admin": true,
-            "last_login": "2014-03-25T16:57:44",
+            "last_login": "2014-03-29T01:44:31",
             "last_name": "Young",
+            "liked_photos": [],
+            "liked_stories": [],
             "likes": [],
             "password": "pbkdf2_sha256$12000$k3ODd7iPjS3t$BHzDizw3lKTgK85UqKFeTPiBkHrzDrrEf70apE802ZE=",
             "username": "admin"
         },
         "model": "accounts.mdquser",
         "pk": 1
+    },
+    {
+        "fields": {
+            "email": "other@motsditsquebec.com",
+            "favourites": [],
+            "first_name": "Other",
+            "following": [],
+            "is_active": true,
+            "is_admin": true,
+            "last_login": "2014-04-07T22:53:21",
+            "last_name": "User",
+            "liked_photos": [],
+            "liked_stories": [],
+            "likes": [],
+            "password": "pbkdf2_sha256$12000$NhgMoEmKBcvr$lJR9smigLp3zfd9pwp0G/rW+ArUDv/YCyjhvV2VAAGQ=",
+            "username": "otheruser"
+        },
+        "model": "accounts.mdquser",
+        "pk": 2
     }
 ]

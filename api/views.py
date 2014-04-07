@@ -24,14 +24,6 @@ import serializers.accounts as accounts_serializers
 import filters
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    '''Returns the subset of public data for the User model'''
-    model = get_user_model()
-    serializer_class = accounts_serializers.UserSerializer
-    paginate_by = 25
-    paginate_by_param = 'limit'
-
-
 class ItemViewSet(viewsets.ModelViewSet):
     '''Viewset for Mot-dit objects'''
     model = Item
@@ -333,3 +325,55 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
         return Response(self.serializer_class(comment).data, status=status.HTTP_201_CREATED)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    '''Returns the subset of public data for the User model'''
+
+    model = get_user_model()
+    serializer_class = accounts_serializers.UserSerializer
+    paginate_by = 25
+    paginate_by_param = 'limit'
+
+    @link()
+    def likes__motsdits(self, request, pk=None):
+        '''Retrieves a list of motsdits this user has liked'''
+        # @TODO: Add pagination
+        serializer = motsdits_serializers.MotDitSerializer
+        queryset = MotDit.objects.filter(likes=pk)
+        return Response(serializer(queryset, many=True).data)
+
+    @link()
+    def likes__photos(self, request, pk=None):
+        '''Retrieves a list of motsdits this user has liked'''
+        # @TODO: Add pagination
+        serializer = motsdits_serializers.PhotoSerializer
+        queryset = Photo.objects.filter(likes=pk)
+        return Response(serializer(queryset, many=True).data)
+
+    @link()
+    def likes__stories(self, request, pk=None):
+        '''Retrieves a list of motsdits this user has liked'''
+        # @TODO: Add pagination
+        serializer = motsdits_serializers.StorySerializer
+        queryset = Story.objects.filter(likes=pk)
+        return Response(serializer(queryset, many=True).data)
+
+    @action(methods=['POST', 'DELETE'])
+    def follow(self, request, pk=None):
+        '''Follow or unfollow a user'''
+
+        user = get_user_model().objects.get(pk=pk)
+
+        if user == request.user:
+            return Response({'error': 'You cannot follow yourself'}, status=status.HTTP_403_FORBIDDEN)
+
+        # User wants to like this photo
+        if request.method == 'POST':
+            user.followers.add(request.user)
+            return Response(status=status.HTTP_201_CREATED)
+
+        # Otherwise we can do a DELETE
+        elif request.method == 'DELETE':
+            user.followers.remove(request.user)
+            return Response(status=status.HTTP_204_NO_CONTENT)

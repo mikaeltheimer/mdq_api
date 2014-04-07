@@ -344,3 +344,36 @@ class CommentTests(MDQApiTest):
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['text'], test_comment)
+
+
+class UserTests(MDQApiTest):
+    '''Tests for interaction with the User API'''
+
+    fixtures = ['test_oauth.json', 'test_accounts.json']
+
+    def test_follow_user(self):
+        '''Tests creating a new following link with a user'''
+
+        response = self.client.post('/api/v2/users/2/follow/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        user = get_user_model().objects.get(pk=2)
+        self.assertIn(self.user, user.followers.all())
+
+    def test_follow_self(self):
+        '''Tests following yourself (shouldnt be allowed)'''
+        response = self.client.post('/api/v2/users/{}/follow/'.format(self.user.id))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unfollow_user(self):
+        '''Tests deleting a following link with a user'''
+
+        self.user.following.add(get_user_model().objects.get(pk=2))
+
+        # Delete a like
+        response = self.client.delete('/api/v2/users/2/follow/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # And verify that the delete worked
+        user = get_user_model().objects.get(pk=2)
+        self.assertNotIn(self.user, user.followers.all())
