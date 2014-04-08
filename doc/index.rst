@@ -52,8 +52,14 @@ Mots-Dits Quebec API Documentation
 .. toctree::
     :maxdepth 2
 
-    items
     motsdits
+    items
+    photos
+    stories
+    news
+    comments
+    users
+    oauth2
     javascript
 
 
