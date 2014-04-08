@@ -109,18 +109,6 @@ STATIC_ROOT = '/home/motsdits/api/static/'
 
 STATIC_URL = '/static/'
 
-
-if not DEBUG:
-    # When in production, default to storing everyhing in Amazon S3
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    AWS_ACCESS_KEY_ID = "AKIAIMQSPV3SJ4Y7GI3Q"
-    AWS_SECRET_ACCESS_KEY = "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"
-    AWS_STORAGE_BUCKET_NAME = "motsditsv2"
-    AWS_QUERYSTRING_AUTH = False
-else:
-    pass
-
-
 AUTH_USER_MODEL = 'accounts.MDQUser'
 
 # Set some vars to represent the two types of items
@@ -186,4 +174,15 @@ NEWS_TYPE_CHOICES = (
 try:
     from local_settings import *
 except ImportError:
+    pass
+
+
+if not DEBUG:
+    # When in production, default to storing everyhing in Amazon S3
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    AWS_ACCESS_KEY_ID = "AKIAIMQSPV3SJ4Y7GI3Q"
+    AWS_SECRET_ACCESS_KEY = "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"
+    AWS_STORAGE_BUCKET_NAME = "motsditsv2"
+    AWS_QUERYSTRING_AUTH = False
+else:
     pass
