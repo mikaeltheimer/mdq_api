@@ -17,9 +17,9 @@ from django.db.models import Q
 
 from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
 
-import serializers.motsdits as motsdits_serializers
-import serializers.motsdits.compact as motsdits_compact
-import serializers.accounts as accounts_serializers
+import api.serializers.motsdits as motsdits_serializers
+from api.serializers.motsdits import motsdits_compact
+import api.serializers.accounts as accounts_serializers
 
 import filters
 
@@ -37,7 +37,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         serializer = motsdits_serializers.MotDitSerializer
         queryset = MotDit.objects.filter(Q(what=pk) | Q(where=pk))
 
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
     @link()
     def photos(self, request, pk=None):
@@ -47,7 +47,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         serializer = motsdits_compact.CompactPhotoSerializer
         queryset = Photo.objects.filter(Q(motdit__what=pk) | Q(motdit__where=pk))
 
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
 
 class ItemAutocomplete(APIView):
@@ -134,7 +134,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
         # @TODO: Add pagination
         serializer = motsdits_compact.CompactPhotoSerializer
         queryset = Photo.objects.filter(motdit=pk)
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
     @link()
     def stories(self, request, pk=None):
@@ -142,7 +142,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
         # @TODO: Add pagination
         serializer = motsdits_compact.CompactStorySerializer
         queryset = Story.objects.filter(motdit=pk)
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
     def create(self, request):
         '''Create a MotDit object'''
@@ -197,7 +197,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Tags must be supplied as a list of strings'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        return Response(self.serializer_class(motdit).data, status=status.HTTP_201_CREATED)
+        return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
 
 class PhotoViewSet(viewsets.ModelViewSet):
@@ -228,7 +228,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
             created_by=request.user
         )
 
-        return Response(self.serializer_class(photo).data, status=status.HTTP_201_CREATED)
+        return Response(self.serializer_class(photo, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
     @action(methods=['POST', 'DELETE'])
     def like(self, request, pk=None):
@@ -265,7 +265,7 @@ class StoryViewSet(viewsets.ModelViewSet):
             created_by=request.user
         )
 
-        return Response(self.serializer_class(story).data, status=status.HTTP_201_CREATED)
+        return Response(self.serializer_class(story, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
     @action(methods=['POST', 'DELETE'])
     def like(self, request, pk=None):
@@ -298,7 +298,7 @@ class NewsViewSet(viewsets.ModelViewSet):
         # @TODO: Add pagination
         serializer = motsdits_compact.CompactCommentSerializer
         queryset = Comment.objects.filter(news_item=pk)
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -324,7 +324,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             created_by=request.user
         )
 
-        return Response(self.serializer_class(comment).data, status=status.HTTP_201_CREATED)
+        return Response(self.serializer_class(comment, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -341,7 +341,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # @TODO: Add pagination
         serializer = motsdits_serializers.MotDitSerializer
         queryset = MotDit.objects.filter(likes=pk)
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
     @link()
     def likes__photos(self, request, pk=None):
@@ -349,7 +349,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # @TODO: Add pagination
         serializer = motsdits_serializers.PhotoSerializer
         queryset = Photo.objects.filter(likes=pk)
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
     @link()
     def likes__stories(self, request, pk=None):
@@ -357,7 +357,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # @TODO: Add pagination
         serializer = motsdits_serializers.StorySerializer
         queryset = Story.objects.filter(likes=pk)
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
     @action(methods=['POST', 'DELETE'])
     def follow(self, request, pk=None):
@@ -384,7 +384,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # @TODO: Add pagination
         serializer = accounts_serializers.UserSerializer
         queryset = get_user_model().objects.filter(followers=pk)
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)
 
     @link()
     def followers(self, request, pk=None):
@@ -392,4 +392,4 @@ class UserViewSet(viewsets.ModelViewSet):
         # @TODO: Add pagination
         serializer = accounts_serializers.UserSerializer
         queryset = get_user_model().objects.filter(following=pk)
-        return Response(serializer(queryset, many=True).data)
+        return Response(serializer(queryset, many=True, context={'request': request}).data)

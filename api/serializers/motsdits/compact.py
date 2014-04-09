@@ -18,23 +18,36 @@ class CompactPhotoSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField('get_picture_url')
     created_by = compact.CompactUserSerializer()
 
+    user_likes = serializers.SerializerMethodField('does_user_like')
+
     def get_picture_url(self, obj):
         '''Gets the url of the actual picture object'''
         return obj.picture.url
 
     class Meta:
         model = Photo
-        fields = ('id', 'url', 'created_by', 'score', 'motdit', )
+        fields = ('id', 'url', 'created_by', 'score', 'motdit', 'user_likes')
+
+    def does_user_like(self, obj):
+        '''Check if the user likes this object'''
+        if self.context.get('request'):
+            return self.context['request'].user in obj.likes.all()
 
 
 class CompactStorySerializer(serializers.ModelSerializer):
     '''Creates a smaller version of a Story object'''
 
     created_by = compact.CompactUserSerializer()
+    user_likes = serializers.SerializerMethodField('does_user_like')
 
     class Meta:
         model = Story
-        fields = ('id', 'text', 'created_by', 'score', 'motdit', )
+        fields = ('id', 'text', 'created_by', 'score', 'motdit', 'user_likes', )
+
+    def does_user_like(self, obj):
+        '''Check if the user likes this object'''
+        if self.context.get('request'):
+            return self.context['request'].user in obj.likes.all()
 
 
 class CompactNewsSerializer(serializers.ModelSerializer):

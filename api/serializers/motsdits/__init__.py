@@ -17,6 +17,7 @@ class MotDitSerializer(serializers.ModelSerializer):
 
     likes = serializers.SerializerMethodField('count_likes')
     favourites = serializers.SerializerMethodField('count_favourites')
+    user_likes = serializers.SerializerMethodField('does_user_like')
 
     tags = serializers.SerializerMethodField('aggregate_tags')
 
@@ -27,8 +28,13 @@ class MotDitSerializer(serializers.ModelSerializer):
             'id', 'created_by',
             'action', 'what', 'where',
             'score', 'likes', 'favourites',
-            'tags',
+            'tags', 'user_likes'
         )
+
+    def does_user_like(self, obj):
+        '''Check if the user likes this object'''
+        if self.context.get('request'):
+            return self.context['request'].user in obj.likes.all()
 
     def count_favourites(self, obj):
         '''Return the count of users that have favourited this motdit'''
@@ -72,6 +78,8 @@ class PhotoSerializer(serializers.ModelSerializer):
     motdit = MotDitSerializer()
     created_by = accounts_compact.CompactUserSerializer()
 
+    user_likes = serializers.SerializerMethodField('does_user_like')
+
     def get_picture_url(self, obj):
         '''Gets the url of the actual picture object'''
         return obj.picture.url
@@ -79,7 +87,12 @@ class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
         depth = 1
-        fields = ('id', 'url', 'created_by', 'motdit', )
+        fields = ('id', 'url', 'created_by', 'motdit', 'user_likes')
+
+    def does_user_like(self, obj):
+        '''Check if the user likes this object'''
+        if self.context.get('request'):
+            return self.context['request'].user in obj.likes.all()
 
 
 class StorySerializer(serializers.ModelSerializer):
@@ -87,11 +100,17 @@ class StorySerializer(serializers.ModelSerializer):
 
     motdit = MotDitSerializer()
     created_by = accounts_compact.CompactUserSerializer()
+    user_likes = serializers.SerializerMethodField('does_user_like')
 
     class Meta:
         model = Story
         depth = 1
-        fields = ('id', 'text', 'created_by', 'motdit', )
+        fields = ('id', 'text', 'created_by', 'motdit', 'user_likes', )
+
+    def does_user_like(self, obj):
+        '''Check if the user likes this object'''
+        if self.context.get('request'):
+            return self.context['request'].user in obj.likes.all()
 
 
 class NewsSerializer(serializers.ModelSerializer):
