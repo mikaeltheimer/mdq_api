@@ -18,6 +18,8 @@ Stories have the following attributes:
 +----------------+--------------------------------------------------------+-------------------------------+
 | **motdit**     | The motdit_ object this photo is related to            | when compact, just the **ID** |
 +----------------+--------------------------------------------------------+-------------------------------+
+| **user_likes** | Does the acting user like this story?                  |                               |
++----------------+--------------------------------------------------------+-------------------------------+
 | **created_by** | A condensed user_ object                               |                               |
 +----------------+--------------------------------------------------------+-------------------------------+
 | **score**      | The overall static score_ that this story has received |                               |

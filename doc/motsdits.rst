@@ -74,7 +74,8 @@ Retrieves a mot-dit by ID, looks like:
             "created", 
             "new", 
             "awesome"
-        ]
+        ],
+        "user_likes": true
     }
 
 One thing to note: **the mot-dit object is slightly different when retrieving** - both the "what" and the "where" fields are references to item_ objects, and so after being created, they are displayed with their name, score and id within the mot-dit
