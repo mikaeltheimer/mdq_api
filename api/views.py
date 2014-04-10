@@ -89,8 +89,6 @@ class MotDitViewSet(viewsets.ModelViewSet):
     '''Viewset for Mot-dit objects'''
     model = MotDit
     serializer_class = motsdits_serializers.MotDitSerializer
-    paginate_by = 25
-    paginate_by_param = 'limit'
     permission_classes = [MotsditsPermissions]
 
     @action(methods=['POST'])
@@ -234,8 +232,6 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
     model = Photo
     serializer_class = motsdits_serializers.PhotoSerializer
-    paginate_by = 25
-    paginate_by_param = 'limit'
     permission_classes = [IsOwnerOrReadOnly]
 
     def create(self, request):
@@ -282,8 +278,6 @@ class StoryViewSet(viewsets.ModelViewSet):
 
     model = Story
     serializer_class = motsdits_serializers.StorySerializer
-    paginate_by = 25
-    paginate_by_param = 'limit'
     permission_classes = [IsOwnerOrReadOnly]
 
     def create(self, request):
@@ -320,8 +314,6 @@ class NewsViewSet(viewsets.ModelViewSet):
 
     model = News
     serializer_class = motsdits_serializers.NewsSerializer
-    paginate_by = 25
-    paginate_by_param = 'limit'
 
     @link()
     def comments(self, request, pk=None):
@@ -337,8 +329,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     model = Comment
     serializer_class = motsdits_serializers.CommentSerializer
-    paginate_by = 25
-    paginate_by_param = 'limit'
     permission_classes = [IsOwnerOrReadOnly]
 
     def create(self, request):
@@ -364,8 +354,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     model = get_user_model()
     serializer_class = accounts_serializers.UserSerializer
-    paginate_by = 25
-    paginate_by_param = 'limit'
 
     @link()
     def likes__motsdits(self, request, pk=None):
