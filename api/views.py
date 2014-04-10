@@ -50,7 +50,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     def photos(self, request, pk=None):
         '''Retrieves a list of photos related to this item'''
 
-        # @TODO: Add pagination
         serializer = motsdits_compact.PaginatedCompactPhotoSerializer
 
         queryset = sorting.sort(request, Photo.objects.filter(Q(motdit__what=pk) | Q(motdit__where=pk)))
@@ -61,10 +60,8 @@ class ItemViewSet(viewsets.ModelViewSet):
 class ItemAutocomplete(APIView):
     '''Item Autocomplete view'''
 
-    #@decorators.method_decorator(ensure_csrf_cookie)
     def get(self, request, name=None):
         '''Provides the autocomplete action for items'''
-        # @TODO: add filter params
         return Response([item.name for item in Item.objects.filter(name__icontains=name)[:10]])
 
 
@@ -165,12 +162,15 @@ class MotDitViewSet(viewsets.ModelViewSet):
         data = request.DATA
 
         # action
-        if isinstance(data.get('action'), int):
-            verb = Action.objects.get(pk=data['action'])
-        elif isinstance(data.get('action'), basestring):
-            verb = Action.objects.get(verb=data['action'])
-        else:
-            return Response({'error': 'Must supply an action'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        try:
+            if isinstance(data.get('action'), int):
+                verb = Action.objects.get(pk=data['action'])
+            elif isinstance(data.get('action'), basestring):
+                verb = Action.objects.get(verb=data['action'])
+            else:
+                return Response({'error': 'Must supply an action'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        except Action.DoesNotExist:
+            return Response({'error': 'Action {} does not exist'.format(data['action'])}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         # Get the related what an where items
         what = resolve_item(data.get('what'), settings.WHAT, user=request.user)
@@ -373,15 +373,16 @@ class UserViewSet(viewsets.ModelViewSet):
     @link()
     def likes__motsdits(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
-        # @TODO: Add pagination
         serializer = motsdits_serializers.PaginatedMotDitSerializer
-        motsdits = get_paginated(request, MotDit.objects.filter(likes=pk))
+
+        queryset = sorting.sort(request, MotDit.objects.filter(likes=pk))
+        motsdits = get_paginated(request, queryset)
+
         return Response(serializer(motsdits, context={'request': request}).data)
 
     @link()
     def likes__photos(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
-        # @TODO: Add pagination
         serializer = motsdits_serializers.PaginatedPhotoSerializer
 
         queryset = sorting.sort(request, Photo.objects.filter(likes=pk))
@@ -392,7 +393,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @link()
     def likes__stories(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
-        # @TODO: Add pagination
         serializer = motsdits_serializers.PaginatedStorySerializer
 
         queryset = sorting.sort(request, Story.objects.filter(likes=pk))
@@ -422,7 +422,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @link()
     def following(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
-        # @TODO: Add pagination
         serializer = accounts_serializers.PaginatedUserSerializer
 
         queryset = sorting.sort(request, get_user_model().objects.filter(followers=pk))
@@ -433,7 +432,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @link()
     def followers(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
-        # @TODO: Add pagination
         serializer = accounts_serializers.PaginatedUserSerializer
 
         queryset = sorting.sort(request, get_user_model().objects.filter(following=pk))
