@@ -5,13 +5,15 @@ from django.conf import settings
 def get_paginated(request, queryset):
     '''Retrieves a paginated version of the queryset'''
 
-    per_page = request.QUERY_PARAMS.get(settings.REST_FRAMEWORK['PAGINATE_BY_PARAM'], settings.REST_FRAMEWORK['PAGINATE_BY'])
+    try:
+        per_page = int(request.QUERY_PARAMS.get(settings.REST_FRAMEWORK['PAGINATE_BY_PARAM'], settings.REST_FRAMEWORK['PAGINATE_BY']))
+    except ValueError:
+        per_page = settings.REST_FRAMEWORK['PAGINATE_BY']
 
     if per_page > settings.REST_FRAMEWORK['MAX_PAGINATE_BY']:
         per_page = settings.REST_FRAMEWORK['MAX_PAGINATE_BY']
 
     paginator = Paginator(queryset, per_page)
-
     page = request.QUERY_PARAMS.get('page')
 
     try:
