@@ -2,8 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from datetime import datetime
-from django.db.models import Q
-
+from django.db.models import Q, Count
 
 ITEM_TYPE_CHOICES = (
     (settings.WHAT, 'What'),
@@ -78,6 +77,14 @@ class Item(MDQBaseModel):
 class MotDit(MDQBaseModel):
     '''Mots-dits are a grouping of action, items and photos'''
 
+    sort_keys = {
+        'created': datetime,
+        'updated': datetime,
+        'name': str,
+        'likes': Count('likes'),
+        'favourites': Count('favourites')
+    }
+
     action = models.ForeignKey(Action)
 
     what = models.ForeignKey(Item, related_name='what')
@@ -108,12 +115,25 @@ class MotDit(MDQBaseModel):
 class Photo(MDQBaseModel):
     '''Photos for MDQ'''
 
+    sort_keys = {
+        'created': datetime,
+        'updated': datetime,
+        'likes': Count('likes')
+    }
+
     picture = models.FileField(upload_to='motsditsv2')
     motdit = models.ForeignKey(MotDit, related_name='photos')
 
 
 class Story(MDQBaseModel):
     '''Comment on a Mot-Dit'''
+
+    sort_keys = {
+        'created': datetime,
+        'updated': datetime,
+        'likes': Count('likes')
+    }
+
     text = models.TextField()
     motdit = models.ForeignKey(MotDit, related_name='stories')
 
@@ -142,6 +162,11 @@ class News(MDQBaseModel):
 
 class Comment(MDQBaseModel):
     '''News comment'''
+
+    sort_keys = {
+        'created': datetime,
+        'updated': datetime
+    }
 
     text = models.TextField()
     news_item = models.ForeignKey(News, related_name='comments')
