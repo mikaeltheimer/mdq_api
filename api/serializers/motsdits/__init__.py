@@ -1,6 +1,7 @@
 from motsdits.models import MotDit, Item, Photo, Story, News, Comment
 
 from rest_framework import serializers
+from rest_framework import pagination
 
 import api.serializers.accounts.compact as accounts_compact
 import compact as motsdits_compact
@@ -53,6 +54,11 @@ class MotDitSerializer(serializers.ModelSerializer):
         return [t.name for t in obj.tags]
 
 
+class PaginatedMotDitSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = MotDitSerializer
+
+
 class ItemSerializer(serializers.ModelSerializer):
     '''Ensures that related objects get serialized'''
 
@@ -62,6 +68,11 @@ class ItemSerializer(serializers.ModelSerializer):
         model = Item
         depth = 1
         fields = ('id', 'name', 'address', 'website', 'tags', 'created_by', 'score', )
+
+
+class PaginatedItemSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = ItemSerializer
 
 
 class PhotoSerializer(serializers.ModelSerializer):
@@ -88,6 +99,11 @@ class PhotoSerializer(serializers.ModelSerializer):
             return self.context['request'].user in obj.likes.all()
 
 
+class PaginatedPhotoSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = PhotoSerializer
+
+
 class StorySerializer(serializers.ModelSerializer):
     '''Serializes the story object'''
 
@@ -106,6 +122,11 @@ class StorySerializer(serializers.ModelSerializer):
             return self.context['request'].user in obj.likes.all()
 
 
+class PaginatedStorySerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = StorySerializer
+
+
 class NewsSerializer(serializers.ModelSerializer):
     '''Serializes the news object'''
 
@@ -120,6 +141,11 @@ class NewsSerializer(serializers.ModelSerializer):
         fields = ('id', 'motdit', 'photo', 'story', 'created_by', )
 
 
+class PaginatedNewsSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = NewsSerializer
+
+
 class CommentSerializer(serializers.ModelSerializer):
     '''Serializes a comment object'''
 
@@ -130,3 +156,8 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         depth = 1
         fields = ('id', 'text', 'created_by', 'news_item', )
+
+
+class PaginatedCommentSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = CommentSerializer

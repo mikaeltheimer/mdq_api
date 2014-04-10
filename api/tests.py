@@ -86,7 +86,7 @@ class ItemTests(MDQApiTest):
 
         ids = sorted([m.id for m in MotDit.objects.filter(Q(what=item) | Q(where=item))])
         response = self.client.get('/api/v2/items/1/related/')
-        self.assertEqual(sorted([m['id'] for m in response.data]), ids)
+        self.assertEqual(sorted([m['id'] for m in response.data['results']]), ids)
 
     def test_item_photos(self):
         '''Test the item photos list'''
@@ -95,7 +95,7 @@ class ItemTests(MDQApiTest):
         ids = [motdit.id for motdit in item.motsdits]
         response = self.client.get('/api/v2/items/1/photos/')
 
-        for photo in response.data:
+        for photo in response.data['results']:
             self.assertIn(photo.motdit, ids)
 
 
@@ -252,7 +252,7 @@ class MotDitTests(MDQApiTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Make sure it only returns photos for MotDit #1
-        for photo in response.data:
+        for photo in response.data['results']:
             self.assertEqual(photo.motdit, 1)
 
     def test_motdit_stories(self):
@@ -262,7 +262,7 @@ class MotDitTests(MDQApiTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Make sure it only returns photos for MotDit #1
-        for story in response.data:
+        for story in response.data['results']:
             self.assertEqual(story.motdit, 1)
 
     def test_favourite_motdit(self):
@@ -406,7 +406,7 @@ class NewsTests(MDQApiTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # And make sure that each comment returned is related to this news item
-        for comment in response.data:
+        for comment in response.data['results']:
             self.assertEqual(comment['news_item'], 1)
 
 

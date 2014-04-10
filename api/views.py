@@ -22,6 +22,9 @@ import api.serializers.motsdits as motsdits_serializers
 from api.serializers.motsdits import motsdits_compact
 import api.serializers.accounts as accounts_serializers
 
+# Pagination helper function
+from pagination import get_paginated
+
 import filters
 
 
@@ -35,20 +38,18 @@ class ItemViewSet(viewsets.ModelViewSet):
     def related(self, request, pk=None):
         '''Recommend the motdit'''
 
-        serializer = motsdits_serializers.MotDitSerializer
-        queryset = MotDit.objects.filter(Q(what=pk) | Q(where=pk))
-
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = motsdits_serializers.PaginatedMotDitSerializer
+        motsdits = get_paginated(request, MotDit.objects.filter(Q(what=pk) | Q(where=pk)))
+        return Response(serializer(motsdits, context={'request': request}).data)
 
     @link()
     def photos(self, request, pk=None):
         '''Retrieves a list of photos related to this item'''
 
         # @TODO: Add pagination
-        serializer = motsdits_compact.CompactPhotoSerializer
-        queryset = Photo.objects.filter(Q(motdit__what=pk) | Q(motdit__where=pk))
-
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = motsdits_compact.PaginatedCompactPhotoSerializer
+        photos = get_paginated(request, Photo.objects.filter(Q(motdit__what=pk) | Q(motdit__where=pk)))
+        return Response(serializer(photos, context={'request': request}).data)
 
 
 class ItemAutocomplete(APIView):
@@ -137,17 +138,17 @@ class MotDitViewSet(viewsets.ModelViewSet):
     def photos(self, request, pk=None):
         '''Retrieves a list of photos related to this item'''
         # @TODO: Add pagination
-        serializer = motsdits_compact.CompactPhotoSerializer
-        queryset = Photo.objects.filter(motdit=pk)
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = motsdits_compact.PaginatedCompactPhotoSerializer
+        photos = get_paginated(request, Photo.objects.filter(motdit=pk))
+        return Response(serializer(photos, context={'request': request}).data)
 
     @link()
     def stories(self, request, pk=None):
         '''Retrieves a list of stories related to this item'''
         # @TODO: Add pagination
-        serializer = motsdits_compact.CompactStorySerializer
-        queryset = Story.objects.filter(motdit=pk)
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = motsdits_compact.PaginatedCompactStorySerializer
+        stories = get_paginated(request, Story.objects.filter(motdit=pk))
+        return Response(serializer(stories, context={'request': request}).data)
 
     def create(self, request):
         '''Create a MotDit object'''
@@ -326,9 +327,9 @@ class NewsViewSet(viewsets.ModelViewSet):
     def comments(self, request, pk=None):
         '''Retrieves a list of stories related to this item'''
         # @TODO: Add pagination
-        serializer = motsdits_compact.CompactCommentSerializer
-        queryset = Comment.objects.filter(news_item=pk)
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = motsdits_compact.PaginatedCompactCommentSerializer
+        comments = get_paginated(request, Comment.objects.filter(news_item=pk))
+        return Response(serializer(comments, context={'request': request}).data)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -370,25 +371,25 @@ class UserViewSet(viewsets.ModelViewSet):
     def likes__motsdits(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
         # @TODO: Add pagination
-        serializer = motsdits_serializers.MotDitSerializer
-        queryset = MotDit.objects.filter(likes=pk)
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = motsdits_serializers.PaginatedMotDitSerializer
+        motsdits = get_paginated(request, MotDit.objects.filter(likes=pk))
+        return Response(serializer(motsdits, context={'request': request}).data)
 
     @link()
     def likes__photos(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
         # @TODO: Add pagination
-        serializer = motsdits_serializers.PhotoSerializer
-        queryset = Photo.objects.filter(likes=pk)
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = motsdits_serializers.PaginatedPhotoSerializer
+        photos = get_paginated(request, Photo.objects.filter(likes=pk))
+        return Response(serializer(photos, context={'request': request}).data)
 
     @link()
     def likes__stories(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
         # @TODO: Add pagination
-        serializer = motsdits_serializers.StorySerializer
-        queryset = Story.objects.filter(likes=pk)
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = motsdits_serializers.PaginatedStorySerializer
+        stories = get_paginated(request, Story.objects.filter(likes=pk))
+        return Response(serializer(stories, context={'request': request}).data)
 
     @action(methods=['POST', 'DELETE'])
     def follow(self, request, pk=None):
@@ -413,14 +414,14 @@ class UserViewSet(viewsets.ModelViewSet):
     def following(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
         # @TODO: Add pagination
-        serializer = accounts_serializers.UserSerializer
-        queryset = get_user_model().objects.filter(followers=pk)
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = accounts_serializers.PaginatedUserSerializer
+        users = get_paginated(request, get_user_model().objects.filter(followers=pk))
+        return Response(serializer(users, context={'request': request}).data)
 
     @link()
     def followers(self, request, pk=None):
         '''Retrieves a list of motsdits this user has liked'''
         # @TODO: Add pagination
-        serializer = accounts_serializers.UserSerializer
-        queryset = get_user_model().objects.filter(following=pk)
-        return Response(serializer(queryset, many=True, context={'request': request}).data)
+        serializer = accounts_serializers.PaginatedUserSerializer
+        users = get_paginated(request, get_user_model().objects.filter(following=pk))
+        return Response(serializer(users, context={'request': request}).data)

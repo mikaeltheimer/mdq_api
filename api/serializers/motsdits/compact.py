@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework import pagination
+
 from motsdits.models import Item, Photo, Story, News, Comment
 
 from api.serializers.accounts import compact
@@ -10,6 +12,11 @@ class CompactItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ('id', 'name', 'score', )
+
+
+class PaginatedCompactItemSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = CompactItemSerializer
 
 
 class CompactPhotoSerializer(serializers.ModelSerializer):
@@ -34,6 +41,11 @@ class CompactPhotoSerializer(serializers.ModelSerializer):
             return self.context['request'].user in obj.likes.all()
 
 
+class PaginatedCompactPhotoSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = CompactPhotoSerializer
+
+
 class CompactStorySerializer(serializers.ModelSerializer):
     '''Creates a smaller version of a Story object'''
 
@@ -50,12 +62,22 @@ class CompactStorySerializer(serializers.ModelSerializer):
             return self.context['request'].user in obj.likes.all()
 
 
+class PaginatedCompactStorySerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = CompactStorySerializer
+
+
 class CompactNewsSerializer(serializers.ModelSerializer):
     '''A smaller version of a News object'''
 
     class Meta:
         model = News
         fields = ('id', 'action', 'created_by', 'score', )
+
+
+class PaginatedCompactNewsSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = CompactNewsSerializer
 
 
 class CompactCommentSerializer(serializers.ModelSerializer):
@@ -66,3 +88,8 @@ class CompactCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'created_by', 'score', 'news_item', )
+
+
+class PaginatedCompactCommentSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = CompactCommentSerializer
