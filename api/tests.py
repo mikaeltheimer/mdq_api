@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from motsdits.models import MotDit, Item, Photo, Story
+from motsdits.models import MotDit, Tag, Item, Photo, Story
 from api.serializers import motsdits as motsdits_serializers
 import json
 
@@ -121,6 +121,83 @@ class MotDitTests(MDQApiTest):
         self.assertEqual(sorted(response.data['tags']), tags)
         self.assertEqual(response.data['action'].lower(), action)
 
+    def test_create_motdit_with_story(self):
+        '''Ensures that we can create a motdit with a story'''
+
+        my_story = 'I ate so many things here'
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'brunch',
+            'where': 'vieux port steakhouse',
+            'action': 'eat',
+            'tags': ['brunch', 'sunday'],
+            'story': my_story
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        story = Story.objects.get(motdit__pk=response.data['id'])
+        self.assertEqual(story.text, my_story)
+
+    def test_create_motdit_with_photo(self):
+        '''Ensures we can create a motdit with a photo'''
+
+        with open('../data/auxvivres.jpg') as testfile:
+            response = self.client.post('/api/v2/motsdits/', {
+                'what': 'vegan',
+                'where': 'aux vivres',
+                'action': 'eat',
+                'tags': 'vegan times, awesomeness',
+                'photo': testfile
+            }, format='multipart')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # as long as it exists, we're good to go
+        Photo.objects.get(motdit=response.data['id'])
+
+    def test_create_duplicate_motdit(self):
+        '''Tests what happens when we create a duplicate motdit object (should always return the same motdit, but still create the sub-objects)'''
+
+        # Create it once
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'snack',
+            'where': 'the mall',
+            'action': 'eat',
+            'tags': 'boring',
+            'story': 'this is the first story'
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        motdit1 = response.data['id']
+
+        # And create it again
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'Snack',
+            'where': 'the Mall ',
+            'action': 'eat',
+            'tags': 'exciting',
+            'story': 'this is the second story'
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        motdit2 = response.data['id']
+
+        self.assertEqual(motdit1, motdit2)
+
+        motdit = MotDit.objects.get(pk=motdit1)
+
+        # Make sure the tags got created
+        self.assertEqual(
+            ['boring', 'exciting'],
+            sorted(t.name for t in motdit.tags)
+        )
+
+        # Make sure the stories got created
+        self.assertEqual(
+            ['this is the first story', 'this is the second story'],
+            sorted(s.text for s in Story.objects.filter(motdit=motdit2))
+        )
+
     def test_delete_motdit(self):
         '''Testing deleting of a motdit'''
 
@@ -133,7 +210,10 @@ class MotDitTests(MDQApiTest):
         response = self.client.get('/api/v2/motsdits/')
         self.assertEqual(response.data['count'], MotDit.objects.count())
 
-        manually_serialized = motsdits_serializers.MotDitSerializer(MotDit.objects.all(), many=True).data
+        class request:
+            user = self.user
+
+        manually_serialized = motsdits_serializers.MotDitSerializer(MotDit.objects.all(), many=True, context={'request': request}).data
         self.assertEqual(response.data['results'], manually_serialized)
 
     def test_flag_motdit(self):
@@ -235,7 +315,8 @@ class PhotoTests(MDQApiTest):
 
     def test_delete_other_user_photo(self):
         '''Tests deletion of a story created by another user'''
-        raise NotImplemented
+        response = self.client.delete('/api/v2/photos/2/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_like_photo(self):
         '''Performs a "like" of the mot-dit by the admin user'''
@@ -287,7 +368,8 @@ class StoryTests(MDQApiTest):
 
     def test_delete_other_user_story(self):
         '''Tests deletion of a story created by another user'''
-        raise NotImplemented
+        response = self.client.delete('/api/v2/stories/2/')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_like_story(self):
         '''Tests liking of stories'''

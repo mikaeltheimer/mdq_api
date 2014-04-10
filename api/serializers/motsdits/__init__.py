@@ -50,14 +50,7 @@ class MotDitSerializer(serializers.ModelSerializer):
 
     def aggregate_tags(self, obj):
         '''Aggregates all the tags for the motdit'''
-        tags = set()
-
-        if obj.what:
-            tags |= {tag.name for tag in obj.what.tags.all()}
-        if obj.where:
-            tags |= {tag.name for tag in obj.where.tags.all()}
-
-        return list(tags)
+        return [t.name for t in obj.tags]
 
 
 class ItemSerializer(serializers.ModelSerializer):

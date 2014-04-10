@@ -92,6 +92,18 @@ class MotDit(MDQBaseModel):
         '''Returns the number of times this mot-dit has been favourited'''
         return get_user_model().objects.filter(favourites=self).count()
 
+    @property
+    def tags(self):
+        '''Returns the set of tags related to this motdit'''
+        tags = set()
+
+        if self.what:
+            tags |= {tag for tag in self.what.tags.all()}
+        if self.where:
+            tags |= {tag for tag in self.where.tags.all()}
+
+        return list(tags)
+
 
 class Photo(MDQBaseModel):
     '''Photos for MDQ'''

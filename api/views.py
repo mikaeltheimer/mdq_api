@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from django.db.models import Q
 
 from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
+from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly
 
 import api.serializers.motsdits as motsdits_serializers
 from api.serializers.motsdits import motsdits_compact
@@ -65,6 +66,9 @@ def resolve_item(value, item_type, user=None):
 
     item = None
 
+    # Pre-clean the value
+    value = value.strip()
+
     if isinstance(value, int):
         item = Item.objects.get(pk=value)
     elif value is not None:
@@ -86,6 +90,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
     serializer_class = motsdits_serializers.MotDitSerializer
     paginate_by = 25
     paginate_by_param = 'limit'
+    permission_classes = [MotsditsPermissions]
 
     @action(methods=['POST'])
     def flag(self, request, pk=None):
@@ -163,6 +168,8 @@ class MotDitViewSet(viewsets.ModelViewSet):
         if not what and not where:
             return Response({'error': 'Must supply at least one of what or where'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+        # @TODO: Make this one transaction
+
         # Create the motdit
         motdit, created = MotDit.objects.get_or_create(
             action=verb,
@@ -176,6 +183,10 @@ class MotDitViewSet(viewsets.ModelViewSet):
         if not created:
             # @TODO: Increase score every time this happens!
             pass
+
+        # If a string is passed, we take tags as a comma separated list
+        if isinstance(data.get('tags', []), basestring):
+            data['tags'] = [t.strip() for t in data['tags'].split(',') if t.strip()]
 
         if isinstance(data.get('tags', []), list):
             for tag_name in data.get('tags', []):
@@ -197,6 +208,23 @@ class MotDitViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'Tags must be supplied as a list of strings'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+        # Create story, if supplied
+        if data.get('story'):
+            Story.objects.create(
+                motdit=motdit,
+                text=data['story'],
+                created_by=request.user
+            )
+
+        # Add a photo, if supplied
+        if request.FILES.get('photo'):
+            # Create the photo
+            Photo.objects.create(
+                picture=request.FILES['photo'],
+                motdit=motdit,
+                created_by=request.user
+            )
+
         return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
 
@@ -207,6 +235,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
     serializer_class = motsdits_serializers.PhotoSerializer
     paginate_by = 25
     paginate_by_param = 'limit'
+    permission_classes = [IsOwnerOrReadOnly]
 
     def create(self, request):
         '''Create a Photo object'''
@@ -248,12 +277,13 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
 
 class StoryViewSet(viewsets.ModelViewSet):
-    '''Viewset for Mot-dit objects'''
+    '''Viewset for story objects'''
 
     model = Story
     serializer_class = motsdits_serializers.StorySerializer
     paginate_by = 25
     paginate_by_param = 'limit'
+    permission_classes = [IsOwnerOrReadOnly]
 
     def create(self, request):
         '''Create a Story object'''
@@ -308,6 +338,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = motsdits_serializers.CommentSerializer
     paginate_by = 25
     paginate_by_param = 'limit'
+    permission_classes = [IsOwnerOrReadOnly]
 
     def create(self, request):
         '''Create a Comment object'''

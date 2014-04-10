@@ -40,6 +40,8 @@ All other attributes are non-mandatory. A sample mot-dit creation request may lo
         'tags': ['created', 'new', 'motdit']
     }
 
+**note**: tags can be supplied as either a list (when POSTing in JSON) or a comma-separated list (when using multipart/form-data)
+
 
 Retrieving Mots-dits
 --------------------
