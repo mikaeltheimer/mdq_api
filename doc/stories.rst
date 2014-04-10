@@ -45,7 +45,7 @@ Your POST data should look like:
 .. code-block:: javascript
 
     {
-        "photo": <attached photo>,
+        "story": "here is a great story",
         "motdit": 1
     }
 
