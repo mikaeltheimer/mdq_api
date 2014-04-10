@@ -6,87 +6,34 @@ http://api.motsditsquebec.com/api/v2/motsdits/
 The motsdits endpoint is one of the two most central features of the API, and provides much of the core interaction that the application relies on
 
 
-Creating Mots-dits
-------------------
-
-**POST** http://api.motsditsquebec.com/api/v2/motsdits/
-
-Each mot-dit has 4 basic attributes:
-
-+------------+----------------------------------------------------------------------------------------------+
-|  **what**  |                  The object/action being referenced (eg. A burger, skiing)                   |
-+------------+----------------------------------------------------------------------------------------------+
-| **where**  | Where the object is (eg. Burger Royal, Le Plateau)                                           |
-+------------+----------------------------------------------------------------------------------------------+
-| **action** | One of the core available actions (aller, sortir, visiter, faire, manger, magasiner, dormir) |
-+------------+----------------------------------------------------------------------------------------------+
-| **tags**   | Free-form meta-tags about the motdit (eg. Awesome, Great night out)                          |
-+------------+----------------------------------------------------------------------------------------------+
-
-
-These are the basic requirement for creating a new mots-dit, of which only **two** are required:
-
-1. One of **what** or **where** (can also be both)
-2. The **action**
-
-All other attributes are non-mandatory. A sample mot-dit creation request may look like:
-
-.. code-block:: javascript
-
-    {
-        'what': 'create an example motsdits',
-        'where': 'api documentation',
-        'action': 'visiter',
-        'tags': ['created', 'new', 'motdit']
-    }
-
-**note**: tags can be supplied as either a list (when POSTing in JSON) or a comma-separated list (when using multipart/form-data)
-
-
-Retrieving Mots-dits
---------------------
-
-**GET** http://api.motsditsquebec.com/api/v2/motsdits/:ID/
-
-Retrieves a mot-dit by ID, looks like:
-
-.. code-block:: javascript
-
-    {
-        "id": 1, 
-        "created_by": {
-            "id": 1, 
-            "username": "hownowstephen"
-        }, 
-        "action": "test", 
-        "what": {
-            "id": 1, 
-            "name": "test an api", 
-            "score": 0.0
-        }, 
-        "where": {
-            "id": 2, 
-            "name": "montreal", 
-            "score": 0.0
-        }, 
-        "score": 0.0, 
-        "likes": 2, 
-        "favourites": 0, 
-        "tags": [
-            "created", 
-            "new", 
-            "awesome"
-        ],
-        "user_likes": true
-    }
-
-One thing to note: **the mot-dit object is slightly different when retrieving** - both the "what" and the "where" fields are references to item_ objects, and so after being created, they are displayed with their name, score and id within the mot-dit
-
-
-Listing Mots-dits (under development)
----------------------------------------------
+Listing Mots-dits
+-----------------
 
 **GET** http://api.motsditsquebec.com/api/v2/motsdits/
+
+Mots-dits have the following attributes:
+
++================+===============================================================+=================================================+
+|   Attribute    |                          Description                          |                      Notes                      |
++================+===============================================================+=================================================+
+| **action**     | The action of this motdit                                     |                                                 |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
+| **what**       | The compact item_ object representing the descriptive action  | will have at least one of **what** or **where** |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
+| **where**      | The compact item_ objet representing the location             | will have at least one of **what** or **where** |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
+| **likes**      | The number of times this motdit has been liked                |                                                 |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
+| **user_likes** | A bool representing whether the acting user likes this motdit |                                                 |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
+| **favourites** | The number of times this motdit has been favourited           |                                                 |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
+| **tags**       | A list of tag names for this motdit                           |                                                 |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
+| **created_by** | A compact user_ object                                        |                                                 |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
+| **score**      | The overall static score_ that this motdit has received       |                                                 |
++----------------+---------------------------------------------------------------+-------------------------------------------------+
 
 Motsdits are loaded in a paginated list, and requests can be filtered using GET parameters
 
@@ -97,6 +44,52 @@ Motsdits are loaded in a paginated list, and requests can be filtered using GET 
 +--------------+--------------------------------------------------------------------------------------------------+
 | **per_page** | Sets the number per page, max of 50                                                              |
 +--------------+--------------------------------------------------------------------------------------------------+
+
+
+Creating Mots-dits
+------------------
+
+**POST** http://api.motsditsquebec.com/api/v2/motsdits/
+
+Each mot-dit has 4 basic attributes:
+
++============+==============================================================================================+===========+
+| Attribute  |                                         Description                                          |           |
++============+==============================================================================================+===========+
+| **what**   | The object/action being referenced (eg. A burger, skiing)                                    | required* |
++------------+----------------------------------------------------------------------------------------------+-----------+
+| **where**  | Where the object is (eg. Burger Royal, Le Plateau)                                           | required* |
++------------+----------------------------------------------------------------------------------------------+-----------+
+| **action** | One of the core available actions (aller, sortir, visiter, faire, manger, magasiner, dormir) | required  |
++------------+----------------------------------------------------------------------------------------------+-----------+
+| **tags**   | Free-form meta-tags about the motdit (eg. Awesome, Great night out)                          |           |
++------------+----------------------------------------------------------------------------------------------+-----------+
+| **story**  | A longform text story to share with the motdit                                               |           |
++------------+----------------------------------------------------------------------------------------------+-----------+
+| **photo**  | A photo file to attach to the motdit when creating                                           |           |
++------------+----------------------------------------------------------------------------------------------+-----------+
+
+* only one of **what** or **where** is required to create a mots-dit
+
+A simple example of creating a mot-dit would be:
+
+.. code-block:: javascript
+
+    {
+        'what': 'an example motsdit',
+        'where': 'api documentation',
+        'action': 'create',
+        'tags': ['created', 'new', 'motdit']
+    }
+
+**note**: tags can be supplied as either a list (when POSTing in JSON) or a comma-separated string (when using multipart/form-data)
+
+Retrieving Mots-dits
+--------------------
+
+**GET** http://api.motsditsquebec.com/api/v2/motsdits/:ID/
+
+Retrieves a mot-dit by ID, with the fields above_
 
 
 Liking and Favouriting Mots-dits
@@ -137,3 +130,4 @@ This endpoint provides a **paginated** list of story_ objects that are related t
 .. _item: items.html
 .. _photo: photos.html
 .. _story: stories.html
+.. _above: #Listing Mots-Dits

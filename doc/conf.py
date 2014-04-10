@@ -45,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MDQ Api'
-copyright = u'2014, Stephen Young'
+copyright = u'2014, Mots-dits Quebec'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

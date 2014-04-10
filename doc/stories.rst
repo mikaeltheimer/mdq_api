@@ -7,7 +7,7 @@ Stories are descriptions of a user_'s relationship to a Mot-dit, by way of recom
 
 
 Listing Stories
---------------
+---------------
 
 **GET** http://api.motsditsquebec.com/api/v2/stories/
 
@@ -51,7 +51,7 @@ Your POST data should look like:
 
 
 Deleting Stories
----------------
+----------------
 
 **DELETE** http://api.motsditsquebec.com/api/v2/stories/:ID/
 
@@ -59,7 +59,7 @@ Users may delete any stories that belong to them. This endpoint will respond wit
 
 
 Liking Stories
--------------
+--------------
 
 **POST** http://api.motsditsquebec.com/api/v2/stories/:ID/like/
 
@@ -72,6 +72,7 @@ This will delete a like on a story. It will always succeed, even if the user doe
 
 .. _item: items.html
 .. _motsdits: motsdits.html
+.. _motdit: motsdits.html
 .. _score: scores.html
 .. _photo: photos.html
 .. _user: users.html
