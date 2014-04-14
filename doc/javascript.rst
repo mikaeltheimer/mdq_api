@@ -46,23 +46,6 @@ and functionality as the Python example. Since it is client side, it depends on 
       this.put = function(path, data, callback, ctype){ return this.request('PUT', path, data, callback, ctype); };
       this.delete = function(path, data, callback, ctype){ return this.request('DELETE', path, data, callback, ctype); };
 
-      // And handle the oauth2 authorization implicitly
-      // WARNING: This is for demonstration purposes, and should NOT be used client-side
-      this.authorize = function(email, password, post_authorize){
-
-        var self = this;
-        this.post('/oauth2/access_token', {
-            'client_id': this.client_id,
-            'client_secret': this.client_secret,
-            'grant_type': 'password',
-            'username': email,
-            'password': password
-        }, function(response){
-          self.access_token = response.access_token;
-          if(post_authorize) post_authorize();
-        }, 'application/x-www-form-urlencoded');
-      };
-
     };
 
 The following is a sample flow that performs authorization and then interacts directly with the API
@@ -78,30 +61,28 @@ All output will be printed directly to the console
     var test_email = 'test@motsditsquebec.com';
     var test_password = 'test';
 
-    api.authorize(test_email, test_password, function(){
-        // Create a new motdit
-        var new_motdit = {
-            'what': 'test an api',
-            'where': 'montreal',
-            'action': 'test',
-            'tags': ['created', 'new', 'awesome']
-        };
+    // Create a new motdit
+    var new_motdit = {
+        'what': 'test an api',
+        'where': 'montreal',
+        'action': 'test',
+        'tags': ['created', 'new', 'awesome']
+    };
 
-        // Simple response handler
-        var log_response = function(r){ console.log(r); };
+    // Simple response handler
+    var log_response = function(r){ console.log(r); };
 
-        // Create a mot-dit
-        api.post('/api/v2/motsdits/', new_motdit, log_response);
+    // Create a mot-dit
+    api.post('/api/v2/motsdits/', new_motdit, log_response);
 
-        // Like a mot-dit
-        api.post('/api/v2/motsdits/1/like/', {}, log_response);
+    // Like a mot-dit
+    api.post('/api/v2/motsdits/1/like/', {}, log_response);
 
-        // List all mots-dits
-        api.get('/api/v2/motsdits/', function(response){
-            for(var i in response.motsdits){
-                console.log(response.motsdits[i]);
-            }
-        });
+    // List all mots-dits
+    api.get('/api/v2/motsdits/', function(response){
+        for(var i in response.motsdits){
+            console.log(response.motsdits[i]);
+        }
     });
 
 
