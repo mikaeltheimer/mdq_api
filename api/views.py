@@ -14,6 +14,7 @@ import rest_framework.filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
+from django.core.validators import EmailValidator, ValidationError
 
 from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
 from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly
@@ -458,3 +459,39 @@ class UserViewSet(viewsets.ModelViewSet):
         users = get_paginated(request, queryset)
 
         return Response(serializer(users, context={'request': request}).data)
+
+
+class UserSelf(APIView):
+    '''User self view (convenience function for accessing the acting user)'''
+
+    serializer = accounts_serializers.FullUserSerializer
+
+    def get(self, request):
+        '''Retrieves a more in-depth version of the user, since it is the authenticated user'''
+        return Response(self.serializer(request.user, context={'request': request}).data)
+
+    def patch(self, request):
+        '''Allows for updating of the acting user'''
+
+        try:
+            if 'email' in request.DATA:
+                EmailValidator()(request.DATA['email'])
+                request.user.email = request.DATA['email']
+
+            if 'first_name' in request.DATA:
+                if not isinstance(request.DATA['first_name'], basestring):
+                    raise ValidationError('first_name must be a string, not {}'.format(type(request.DATA['first_name'])))
+                request.user.first_name = request.DATA['first_name']
+
+            if 'last_name' in request.DATA:
+                if not isinstance(request.DATA['last_name'], basestring):
+                    raise ValidationError('last_name must be a string, not {}'.format(type(request.DATA['last_name'])))
+                request.user.last_name = request.DATA['last_name']
+
+            # Finally, save the user
+            request.user.save()
+
+            return Response(self.serializer(request.user, context={'request': request}).data)
+
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

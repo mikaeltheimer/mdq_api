@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from motsdits.models import MotDit, Tag, Item, Photo, Story
+from motsdits.models import MotDit, Item, Photo, Story
 from api.serializers import motsdits as motsdits_serializers
 import json
 
@@ -459,3 +459,55 @@ class UserTests(MDQApiTest):
         # And verify that the delete worked
         user = get_user_model().objects.get(pk=2)
         self.assertNotIn(self.user, user.followers.all())
+
+    def test_load_self(self):
+        '''Tests the self loading endpoint'''
+        response = self.client.get('/api/v2/users/self', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['email'], self.user.email)
+
+    def test_update_self(self):
+        '''Tests a PUT to the self endpoint'''
+
+        test_email = 'abc@123.com'
+        test_email_fail = 'this email fails'
+        test_fname = 'firsty'
+        test_lname = 'lasty'
+
+        # Set the email
+        response = self.client.patch('/api/v2/users/self', {
+            'email': test_email
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user = get_user_model().objects.get(pk=self.user.pk)
+        self.assertEqual(user.email, test_email)
+
+        # Set an invalid email
+        response = self.client.patch('/api/v2/users/self', {
+            'email': test_email_fail
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        user = get_user_model().objects.get(pk=self.user.pk)
+        self.assertNotEqual(user.email, test_email_fail)
+
+        # Set name of the user
+        response = self.client.patch('/api/v2/users/self', {
+            'first_name': test_fname,
+            'last_name': test_lname
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user = get_user_model().objects.get(pk=self.user.pk)
+        self.assertEqual(user.first_name, test_fname)
+        self.assertEqual(user.last_name, test_lname)
+
+        # Test invalid first name setting
+        response = self.client.patch('/api/v2/users/self', {
+            'first_name': 1
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # And invalid last name setting
+        response = self.client.patch('/api/v2/users/self', {
+            'last_name': 1
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
