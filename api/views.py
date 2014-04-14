@@ -6,6 +6,7 @@ Generates all the necessary viewsets to serve the API
 
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.db import transaction
 
 # Django plugins
 from rest_framework import viewsets, status
@@ -180,64 +181,69 @@ class MotDitViewSet(viewsets.ModelViewSet):
         if not what and not where:
             return Response({'error': 'Must supply at least one of what or where'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        # @TODO: Make this one transaction
+        try:
+            with transaction.atomic():
+                # Create the motdit
+                motdit, created = MotDit.objects.get_or_create(
+                    action=verb,
+                    what=what,
+                    where=where,
+                    defaults={
+                        'created_by': request.user
+                    }
+                )
 
-        # Create the motdit
-        motdit, created = MotDit.objects.get_or_create(
-            action=verb,
-            what=what,
-            where=where,
-            defaults={
-                'created_by': request.user
-            }
-        )
+                if not created:
+                    # @TODO: Increase score every time this happens!
+                    pass
 
-        if not created:
-            # @TODO: Increase score every time this happens!
-            pass
+                # If a string is passed, we take tags as a comma separated list
+                if isinstance(data.get('tags', []), basestring):
+                    data['tags'] = [t.strip() for t in data['tags'].split(',') if t.strip()]
 
-        # If a string is passed, we take tags as a comma separated list
-        if isinstance(data.get('tags', []), basestring):
-            data['tags'] = [t.strip() for t in data['tags'].split(',') if t.strip()]
+                if isinstance(data.get('tags', []), list):
+                    for tag_name in data.get('tags', []):
+                        try:
+                            tag = Tag.objects.get(name__iexact=tag_name)
+                        except Tag.DoesNotExist:
+                            tag = Tag.objects.create(
+                                name=tag_name,
+                                created_by=request.user
+                            )
 
-        if isinstance(data.get('tags', []), list):
-            for tag_name in data.get('tags', []):
-                try:
-                    tag = Tag.objects.get(name__iexact=tag_name)
-                except Tag.DoesNotExist:
-                    tag = Tag.objects.create(
-                        name=tag_name,
+                        # Add the tag to the what, if specified
+                        if what:
+                            what.tags.add(tag)
+
+                        # And add the tag to the where as well
+                        if where:
+                            where.tags.add(tag)
+                elif not data.get('tags'):
+                    # allow passing tags: None to the endpoint
+                    pass
+                else:
+                    raise ValueError('Tags must be supplied as a list or comma separated string')
+
+                # Create story, if supplied
+                if data.get('story'):
+                    Story.objects.create(
+                        motdit=motdit,
+                        text=data['story'],
                         created_by=request.user
                     )
 
-                # Add the tag to the what, if specified
-                if what:
-                    what.tags.add(tag)
+                # Add a photo, if supplied
+                if request.FILES.get('photo'):
+                    # Create the photo
+                    Photo.objects.create(
+                        picture=request.FILES['photo'],
+                        motdit=motdit,
+                        created_by=request.user
+                    )
 
-                # And add the tag to the where as well
-                if where:
-                    where.tags.add(tag)
-        else:
-            return Response({'error': 'Tags must be supplied as a list of strings'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-
-        # Create story, if supplied
-        if data.get('story'):
-            Story.objects.create(
-                motdit=motdit,
-                text=data['story'],
-                created_by=request.user
-            )
-
-        # Add a photo, if supplied
-        if request.FILES.get('photo'):
-            # Create the photo
-            Photo.objects.create(
-                picture=request.FILES['photo'],
-                motdit=motdit,
-                created_by=request.user
-            )
-
-        return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
+                return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PhotoViewSet(viewsets.ModelViewSet):

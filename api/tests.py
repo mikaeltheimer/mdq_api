@@ -198,6 +198,25 @@ class MotDitTests(MDQApiTest):
             sorted(s.text for s in Story.objects.filter(motdit=motdit2))
         )
 
+    def test_transaction_failure_motdit(self):
+        '''Test that if the motdit transaction doesn't get to the end, the motdit doesn't get created'''
+
+        motdit_count = MotDit.objects.count()
+        story_count = Story.objects.count()
+
+         # Create it once
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'tasty snacks',
+            'where': 'everywhere that is great',
+            'action': 'eat',
+            'tags': {'this': 1, 'will': 2, 'fail': 3},
+            'story': 'so this one time, i had some snacks...'
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(MotDit.objects.count(), motdit_count)
+        self.assertEqual(Story.objects.count(), story_count)
+
     def test_delete_motdit(self):
         '''Testing deleting of a motdit'''
 
