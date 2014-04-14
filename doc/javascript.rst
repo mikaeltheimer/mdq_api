@@ -1,31 +1,18 @@
 Javascript Example
 ==================
 
-This is a pure-javascript example. It's worth noting that the API key generation stage should NOT be done in pure frontend javascript in a production setting. The proper approach is:
-
-1. Receive request from user to log-in
-2. Pass credentials to a backend service that queries the API (server side)
-3. Store the access key in the session cookie
-4. Access only the session key via Javascript
-
-For the purposes of example, this API provides all of the functionality on the frontend
-
 The following is a simple example of an API wrapper library for the MDQ API, it provides the same methods
-and functionality as the Python example
+and functionality as the Python example. Since it is client side, it depends on the access token being explicitly stored within a web cookie, see the oauth2_ example for how this is configured.
 
 .. code-block:: javascript
 
     /**
      * API Library (requires jQuery)
      */
-    function MDQApi(client_id, client_secret) {
-
-      // Client ID and secret supplied by the application
-      this.client_id = client_id;
-      this.client_secret = client_secret;
+    function MDQApi(access_token) {
 
       // The access token to be used
-      this.access_token = null;
+      this.access_token = access_token;
 
       // Actual request wrapper
       this.request = function(method, path, data, callback, content_type){
@@ -82,8 +69,11 @@ The following is a sample flow that performs authorization and then interacts di
 All output will be printed directly to the console
 
 .. code-block:: javascript
+    
+    // Load the access token from the cookies
+    var access_token = $.cookie('access_token');
 
-    var api = new MDQApi('291f1dda02ea49f16baa', 'c0635020316d5a697f5935cf5d44c769fd454b76');
+    var api = new MDQApi(access_token);
 
     var test_email = 'test@motsditsquebec.com';
     var test_password = 'test';
@@ -113,3 +103,6 @@ All output will be printed directly to the console
             }
         });
     });
+
+
+.. _oauth2: oauth2.html
