@@ -28,8 +28,6 @@ import api.serializers.accounts as accounts_serializers
 from pagination import get_paginated
 import sorting
 
-import filters
-
 
 class ItemViewSet(viewsets.ModelViewSet):
     '''Viewset for Mot-dit objects'''
