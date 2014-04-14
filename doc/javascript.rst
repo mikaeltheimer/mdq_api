@@ -58,9 +58,6 @@ All output will be printed directly to the console
 
     var api = new MDQApi(access_token);
 
-    var test_email = 'test@motsditsquebec.com';
-    var test_password = 'test';
-
     // Create a new motdit
     var new_motdit = {
         'what': 'test an api',
