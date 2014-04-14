@@ -499,3 +499,17 @@ class UserSelf(APIView):
 
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserRegister(APIView):
+    '''Register a user'''
+
+    def post(self, request):
+        '''POST a new user object to be registered'''
+        
+        # user = get_user_model().objects.create(
+        #     email=request.DATA['email'],
+        #     username=request.DATA['username'],
+        #     first_name=request.DATA['first_name'],
+        #     last_name=request.DATA['last_name']
+        # )

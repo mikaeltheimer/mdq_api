@@ -28,6 +28,7 @@ urlpatterns = patterns(
     # Custom autocomplete endpoint
     url(r'v2/items/autocomplete/(?P<name>[^/]+)/??', views.ItemAutocomplete.as_view()),
     url(r'v2/users/self/?', views.UserSelf.as_view()),
+    url(r'v2/users/register/?', views.UserRegister.as_view()),
 
     # Basic API
     url(r'v2/', include(router.urls)),

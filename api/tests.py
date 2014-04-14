@@ -530,3 +530,75 @@ class UserTests(MDQApiTest):
             'last_name': 1
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_registration_create(self):
+        '''Tests the user registration flow'''
+
+        # Test creating a good user
+        response = self.client.post('/api/v2/users/register', {
+            'email': 'unused@motsditsquebec.com',
+            'username': 'mr_unused',
+            'first_name': 'test',
+            'last_name': 'user',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Tests that fail creating a user
+
+        ## Bad email
+        response = self.client.post('/api/v2/users/register', {
+            'email': 'invalid_email',
+            'username': 'mr_unused2',
+            'first_name': 'test',
+            'last_name': 'user',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        ## Conflicting username
+        response = self.client.post('/api/v2/users/register', {
+            'email': 'unused2@motsditsquebec.com',
+            'username': 'test',
+            'first_name': 'test',
+            'last_name': 'user',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        ## Conflicting email
+        response = self.client.post('/api/v2/users/register', {
+            'email': 'test@motsditsquebec.com',
+            'username': 'test',
+            'first_name': 'test',
+            'last_name': 'user',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        ## Missing data
+        response = self.client.post('/api/v2/users/register', {
+            'email': 'unused2@motsditsquebec.com',
+            'username': 'test',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_registration_validate(self):
+        '''Registers a user and then activates using the validation key'''
+
+        # Create a good user
+        response = self.client.post('/api/v2/users/register', {
+            'email': 'unused@motsditsquebec.com',
+            'username': 'mr_unused',
+            'first_name': 'test',
+            'last_name': 'user',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        user_id = response['id']
+
+        validation_code = get_user_model().objects.get(pk=user_id, validated=False).validation_code
+
+        response = self.client.get('/api/v2/users/validate/{}'.format(validation_code))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # And check that the user is now valid
+        valid_user = get_user_model().objects.get(pk=user_id)
+        self.assertTrue(valid_user.validated)
+        self.assertTrue(valid_user.active)

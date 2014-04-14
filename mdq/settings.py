@@ -137,8 +137,19 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
     'PAGINATE_BY': 50,
-    'PAGINATE_BY_PARAM': 'per_page',  # Allow client to override, using `?page_size=xxx`.
-    'MAX_PAGINATE_BY': 100             # Maximum limit allowed when using `?page_size=xxx`.
+    'PAGINATE_BY_PARAM': 'per_page',  # Allow client to override, using `?per_page=xxx`.
+    'MAX_PAGINATE_BY': 100,            # Maximum limit allowed when using `?per_page=xxx`.
+
+    # Configure user throttling
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.UserRateThrottle',
+    ),
+
+    # Set throttle rate to fairly high
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '10/second'
+    }
+
 }
 
 # Mots-dits news
