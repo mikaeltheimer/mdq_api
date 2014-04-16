@@ -132,8 +132,6 @@ class MotDitTests(MDQApiTest):
             'tags': tags
         }, format='json')
 
-        print response.content
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         response = self.client.post('/api/v2/motsdits/', {
@@ -151,8 +149,6 @@ class MotDitTests(MDQApiTest):
             'what': 'la banquise',
             'action': 'eat',
         }, format='json')
-
-        print response.content
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
