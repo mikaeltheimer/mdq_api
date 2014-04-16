@@ -180,15 +180,19 @@ class MotDitViewSet(viewsets.ModelViewSet):
 
         try:
             with transaction.atomic():
+
+                motdit_data = {
+                    'action': verb,
+                    'defaults': {'created_by': request.user}
+                }
+
+                if what:
+                    motdit_data['what'] = what
+                if where:
+                    motdit_data['where'] = where
+
                 # Create the motdit
-                motdit, created = MotDit.objects.get_or_create(
-                    action=verb,
-                    what=what,
-                    where=where,
-                    defaults={
-                        'created_by': request.user
-                    }
-                )
+                motdit, created = MotDit.objects.get_or_create(**motdit_data)
 
                 if not created:
                     # @TODO: Increase score every time this happens!

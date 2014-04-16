@@ -87,8 +87,8 @@ class MotDit(MDQBaseModel):
 
     action = models.ForeignKey(Action)
 
-    what = models.ForeignKey(Item, related_name='what')
-    where = models.ForeignKey(Item, related_name='where')
+    what = models.ForeignKey(Item, related_name='what', null=True)
+    where = models.ForeignKey(Item, related_name='where', null=True)
 
     def __str__(self):
         '''Stringified version'''

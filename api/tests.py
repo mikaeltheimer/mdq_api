@@ -121,6 +121,41 @@ class MotDitTests(MDQApiTest):
         self.assertEqual(sorted(response.data['tags']), tags)
         self.assertEqual(response.data['action'].lower(), action)
 
+    def test_create_partial_motdit(self):
+        '''Create a motdit with only what or only where'''
+        action = 'eat'
+        tags = sorted(['fries', 'cheese curds', 'poutine', 'delicious'])
+
+        response = self.client.post('/api/v2/motsdits/', {
+            'where': 'la banquise',
+            'action': action,
+            'tags': tags
+        }, format='json')
+
+        print response.content
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'la banquise',
+            'action': action,
+            'tags': tags
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_motdit_with_no_tags(self):
+        '''Create a motdit with no tags'''
+
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'la banquise',
+            'action': 'eat',
+        }, format='json')
+
+        print response.content
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def test_create_motdit_with_story(self):
         '''Ensures that we can create a motdit with a story'''
 
