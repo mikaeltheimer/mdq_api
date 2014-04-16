@@ -70,12 +70,11 @@ def resolve_item(value, item_type, user=None):
 
     item = None
 
-    # Pre-clean the value
-    value = value.strip()
-
     if isinstance(value, int):
         item = Item.objects.get(pk=value)
     elif value is not None:
+        # Pre-clean the value
+        value = value.strip()
         try:
             item = Item.objects.get(type=item_type, name__iexact=value)
         except Item.DoesNotExist:
