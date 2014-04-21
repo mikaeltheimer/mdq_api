@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from uuid import uuid4
 
 
 class MDQUserManager(BaseUserManager):
@@ -32,11 +33,7 @@ class MDQUserManager(BaseUserManager):
 class MDQUser(AbstractBaseUser):
     '''Custom user account, specific to MDQ spec'''
 
-    email = models.EmailField(
-        verbose_name='email address',
-        max_length=255,
-        unique=True,
-    )
+    email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
 
     # A unique username
     username = models.CharField(max_length=255, unique=True)
@@ -57,6 +54,9 @@ class MDQUser(AbstractBaseUser):
     liked_stories = models.ManyToManyField('motsdits.Story', null=True, blank=True, related_name='likes')
 
     following = models.ManyToManyField('MDQUser', null=True, blank=True, related_name='followers')
+
+    validation_code = models.CharField(max_length=255, null=True, blank=True, default=lambda: uuid4().hex)
+    validated = models.BooleanField(default=False)
 
     # Other requirements
     objects = MDQUserManager()

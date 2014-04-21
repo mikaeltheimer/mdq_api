@@ -147,7 +147,7 @@ REST_FRAMEWORK = {
 
     # Set throttle rate to fairly high
     'DEFAULT_THROTTLE_RATES': {
-        'user': '10/second'
+        'user': '25/second'
     }
 
 }

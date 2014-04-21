@@ -16,6 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
 from django.core.validators import EmailValidator, ValidationError
+from django.core.exceptions import ValidationError
 
 from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
 from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly
@@ -509,10 +510,48 @@ class UserRegister(APIView):
 
     def post(self, request):
         '''POST a new user object to be registered'''
-        
-        # user = get_user_model().objects.create(
-        #     email=request.DATA['email'],
-        #     username=request.DATA['username'],
-        #     first_name=request.DATA['first_name'],
-        #     last_name=request.DATA['last_name']
-        # )
+
+        # Create a user
+        try:
+            user = get_user_model()(
+                email=request.DATA['email'],
+                username=request.DATA['username'],
+                password=request.DATA['password'],
+                first_name=request.DATA['first_name'],
+                last_name=request.DATA['last_name'],
+            )
+
+            user.full_clean()
+            user.save()
+        except (ValidationError, KeyError) as e:
+            return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Default to sending of the email (otherwise we're doing something funky like tests)
+        if request.DATA.get('send_email', True):
+            from django.core.mail import EmailMultiAlternatives
+
+            link = 'http://api.motsditsquebec.com/api/v2/users/validate/{code}'.format(code=user.validation_code)
+
+            subject, from_email, to = 'Verifiez votre compte Mots-dits Quebec', 'accounts@motsditsquebec.com', user.email
+            text_content = 'Pour verifier, cliquez le lien ci-dessus {link}'.format(link=link)
+            html_content = 'Pour verifier, cliquez le lien ci-dessus<br /><br /><a href="{link}">{link}</a>'.format(link=link)
+            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+
+        return Response({'success': True, 'id': user.id}, status=status.HTTP_201_CREATED)
+
+
+class UserValidate(APIView):
+    '''Validate a user'''
+
+    serializer = accounts_serializers.FullUserSerializer
+
+    def get(self, request, validation_code=None):
+        '''Visit the page of a validation code, and you're valid!'''
+
+        user = get_user_model().objects.get(validation_code=validation_code)
+        user.validated = True
+        user.save()
+
+        return Response(self.serializer(user).data)

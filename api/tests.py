@@ -569,8 +569,10 @@ class UserTests(MDQApiTest):
         response = self.client.post('/api/v2/users/register', {
             'email': 'unused@motsditsquebec.com',
             'username': 'mr_unused',
+            'password': '123456',
             'first_name': 'test',
             'last_name': 'user',
+            'send_email': False
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -580,6 +582,7 @@ class UserTests(MDQApiTest):
         response = self.client.post('/api/v2/users/register', {
             'email': 'invalid_email',
             'username': 'mr_unused2',
+            'password': '123456',
             'first_name': 'test',
             'last_name': 'user',
         }, format='json')
@@ -588,7 +591,8 @@ class UserTests(MDQApiTest):
         ## Conflicting username
         response = self.client.post('/api/v2/users/register', {
             'email': 'unused2@motsditsquebec.com',
-            'username': 'test',
+            'username': 'otheruser',
+            'password': '123456',
             'first_name': 'test',
             'last_name': 'user',
         }, format='json')
@@ -596,8 +600,9 @@ class UserTests(MDQApiTest):
 
         ## Conflicting email
         response = self.client.post('/api/v2/users/register', {
-            'email': 'test@motsditsquebec.com',
+            'email': 'other@motsditsquebec.com',
             'username': 'test',
+            'password': '123456',
             'first_name': 'test',
             'last_name': 'user',
         }, format='json')
@@ -617,12 +622,14 @@ class UserTests(MDQApiTest):
         response = self.client.post('/api/v2/users/register', {
             'email': 'unused@motsditsquebec.com',
             'username': 'mr_unused',
+            'password': '123456',
             'first_name': 'test',
             'last_name': 'user',
+            'send_email': False
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        user_id = response['id']
+        user_id = response.data['id']
 
         validation_code = get_user_model().objects.get(pk=user_id, validated=False).validation_code
 
@@ -632,4 +639,4 @@ class UserTests(MDQApiTest):
         # And check that the user is now valid
         valid_user = get_user_model().objects.get(pk=user_id)
         self.assertTrue(valid_user.validated)
-        self.assertTrue(valid_user.active)
+        self.assertTrue(valid_user.is_active)
