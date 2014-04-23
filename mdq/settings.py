@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'provider.oauth2',
     'django_filters',
     #'rest_framework.authtoken', # enable when setting up token-based authentication
+    #'haystack',
 
     # Admin plugins
     #'suit',

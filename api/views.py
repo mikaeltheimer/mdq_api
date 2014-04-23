@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
 from django.core.validators import EmailValidator, ValidationError
-from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 
 from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
 from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly
@@ -530,8 +530,7 @@ class UserRegister(APIView):
         if request.DATA.get('send_email', True):
             from django.core.mail import EmailMultiAlternatives
 
-            link = 'http://api.motsditsquebec.com/api/v2/users/validate/{code}'.format(code=user.validation_code)
-
+            link = request.build_absolute_uri(reverse('validate-user', args=[user.validation_code]))
             subject, from_email, to = 'Verifiez votre compte Mots-dits Quebec', 'accounts@motsditsquebec.com', user.email
             text_content = 'Pour verifier, cliquez le lien ci-dessus {link}'.format(link=link)
             html_content = 'Pour verifier, cliquez le lien ci-dessus<br /><br /><a href="{link}">{link}</a>'.format(link=link)

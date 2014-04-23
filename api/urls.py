@@ -30,8 +30,8 @@ urlpatterns = patterns(
     url(r'v2/users/self/?', views.UserSelf.as_view()),
 
     # Registration and verification
-    url(r'v2/users/register/?', views.UserRegister.as_view()),
-    url(r'v2/users/validate/(?P<validation_code>[^/]+)/?', views.UserValidate.as_view()),
+    url(r'v2/users/register/?', views.UserRegister.as_view(), name='register-user'),
+    url(r'v2/users/validate/(?P<validation_code>[^/]+)/?', views.UserValidate.as_view(), name='validate-user'),
 
     # Basic API
     url(r'v2/', include(router.urls)),
