@@ -202,10 +202,12 @@ class MotDitViewSet(viewsets.ModelViewSet):
 
                 # If a string is passed, we take tags as a comma separated list
                 if isinstance(data.get('tags', []), basestring):
-                    data['tags'] = [t.strip() for t in data['tags'].split(',') if t.strip()]
+                    tags = [t.strip() for t in data['tags'].split(',') if t.strip()]
+                else:
+                    tags = data.get('tags')
 
-                if isinstance(data.get('tags', []), list):
-                    for tag_name in data.get('tags', []):
+                if isinstance(tags, list):
+                    for tag_name in tags:
                         try:
                             tag = Tag.objects.get(name__iexact=tag_name)
                         except Tag.DoesNotExist:
@@ -221,7 +223,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
                         # And add the tag to the where as well
                         if where:
                             where.tags.add(tag)
-                elif not data.get('tags'):
+                elif not tags:
                     # allow passing tags: None to the endpoint
                     pass
                 else:
@@ -246,6 +248,8 @@ class MotDitViewSet(viewsets.ModelViewSet):
 
                 return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
