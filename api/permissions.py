@@ -22,3 +22,15 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
         # Instance must have an attribute named `owner`.
         return obj.created_by == request.user
+
+
+class DefaultPermissions(permissions.BasePermission):
+    """By default, we look for authenticated users that are valid"""
+
+    def has_permission(self, request, view):
+        '''check the permissions'''
+
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return request.user and request.user.validated

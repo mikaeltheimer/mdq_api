@@ -1,13 +1,13 @@
 # from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from motsdits.models import MotDit, Item, Photo, Story
 from api.serializers import motsdits as motsdits_serializers
 import json
-
-from django.db.models import Q
 
 
 NEW_PASSWORD = 'password'
@@ -51,8 +51,15 @@ class MDQApiTest(APITestCase):
 
     def setUp(self):
         '''Sets up the necessary access token'''
+
+        # Default client
         self.user = get_user_model().objects.get(username='admin')
         ensure_access_token(self.client, self.user)
+
+        # And an alt user client
+        self.alt_user = get_user_model().objects.get(username='otheruser')
+        self.alt_client = self.client_class()
+        ensure_access_token(self.alt_client, self.alt_user)
 
 
 class ItemTests(MDQApiTest):
@@ -492,6 +499,21 @@ class UserTests(MDQApiTest):
     '''Tests for interaction with the User API'''
 
     fixtures = ['test_oauth.json', 'test_accounts.json']
+
+    def test_unverified_user_action(self):
+        '''Tries to perform an action that an unverified user should not be able to do'''
+
+        action = 'eat'
+        tags = sorted(['fries', 'cheese curds', 'poutine', 'delicious'])
+
+        response = self.alt_client.post('/api/v2/motsdits/', {
+            'what': 'a poutine',
+            'where': 'la banquise',
+            'action': action,
+            'tags': tags
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_follow_user(self):
         '''Tests creating a new following link with a user'''

@@ -13,7 +13,8 @@
             "liked_stories": [],
             "likes": [],
             "password": "pbkdf2_sha256$12000$k3ODd7iPjS3t$BHzDizw3lKTgK85UqKFeTPiBkHrzDrrEf70apE802ZE=",
-            "username": "admin"
+            "username": "admin",
+            "validated": true
         },
         "model": "accounts.mdquser",
         "pk": 1
@@ -32,7 +33,8 @@
             "liked_stories": [],
             "likes": [],
             "password": "pbkdf2_sha256$12000$NhgMoEmKBcvr$lJR9smigLp3zfd9pwp0G/rW+ArUDv/YCyjhvV2VAAGQ=",
-            "username": "otheruser"
+            "username": "otheruser",
+            "validated": false
         },
         "model": "accounts.mdquser",
         "pk": 2

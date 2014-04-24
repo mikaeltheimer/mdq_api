@@ -20,7 +20,7 @@ from django.core.validators import EmailValidator, ValidationError
 from django.core.urlresolvers import reverse
 
 from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
-from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly
+from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly, DefaultPermissions
 
 import api.serializers.motsdits as motsdits_serializers
 from api.serializers.motsdits import motsdits_compact
@@ -93,7 +93,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
     '''Viewset for Mot-dit objects'''
     model = MotDit
     serializer_class = motsdits_serializers.MotDitSerializer
-    permission_classes = [MotsditsPermissions]
+    permission_classes = [DefaultPermissions, MotsditsPermissions]
 
     @action(methods=['POST'])
     def flag(self, request, pk=None):
@@ -254,7 +254,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
     model = Photo
     serializer_class = motsdits_serializers.PhotoSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [DefaultPermissions, IsOwnerOrReadOnly]
 
     def create(self, request):
         '''Create a Photo object'''
@@ -300,7 +300,7 @@ class StoryViewSet(viewsets.ModelViewSet):
 
     model = Story
     serializer_class = motsdits_serializers.StorySerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [DefaultPermissions, IsOwnerOrReadOnly]
 
     def create(self, request):
         '''Create a Story object'''
@@ -354,7 +354,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     model = Comment
     serializer_class = motsdits_serializers.CommentSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [DefaultPermissions, IsOwnerOrReadOnly]
 
     def create(self, request):
         '''Create a Comment object'''

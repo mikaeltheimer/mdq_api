@@ -134,7 +134,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.OAuth2Authentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'api.permissions.DefaultPermissions',
     ),
     'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
     'PAGINATE_BY': 50,
