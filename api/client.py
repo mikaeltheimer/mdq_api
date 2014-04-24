@@ -8,21 +8,31 @@ import requests
 
 class ApiClient:
 
-    base_url = "http://api.motsditsquebec.com"
+    def __init__(self, client_id, client_secret, base_url="http://api.motsditsquebec.com"):
 
-    def __init__(self):
+        self.base_url = base_url
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.headers = {}
+        self.logged_in = False
+
+    def login(self, username, password):
+        '''Perform a login'''
         # Request an access token
-        response = requests.post("{0}/oauth2/access_token/".format(self.base_url), data={
-            'client_id': '5937f1cbf5e03bf33353',
-            'client_secret': 'fd6139071a86c8ebb946f645dd18a22eec2bb23b',
+        response = self.post("{0}/oauth2/access_token/".format(self.base_url), data={
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
             'grant_type': 'password',
-            'username': 'me@hownowstephen.com',
-            'password': 'goose'
+            'username': username,
+            'password': password
         })
 
         self.headers = {
             'Authorization': 'Bearer ' + response.json()['access_token']
         }
+        self.logged_in = True
+
+        return response
 
     def request(self, method, url, *args, **kwargs):
         if not 'headers' in kwargs:
