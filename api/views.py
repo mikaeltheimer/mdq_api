@@ -11,6 +11,7 @@ from django.db import transaction
 # Django plugins
 from rest_framework import viewsets, status
 from rest_framework.decorators import link, action
+from rest_framework.permissions import AllowAny
 import rest_framework.filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -507,6 +508,8 @@ class UserSelf(APIView):
 
 class UserRegister(APIView):
     '''Register a user'''
+
+    permission_classes = (AllowAny, )
 
     def post(self, request):
         '''POST a new user object to be registered'''

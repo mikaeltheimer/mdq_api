@@ -33,7 +33,17 @@ def ensure_access_token(api_client, user):
     # Request an access token
     response = api_client.post("/oauth2/access_token/", grant_data, format='multipart')
     data = json.loads(response.content)
-    return api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + data['access_token'])
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + data['access_token'])
+
+    def post_anon(*args, **kwargs):
+        '''Add an anonymous posting util (post without credentials)'''
+        credentials = api_client._credentials
+        api_client._credentials = {}
+        response = api_client.post(*args, **kwargs)
+        api_client._credentials = credentials
+        return response
+
+    api_client.post_anon = post_anon
 
 
 class MDQApiTest(APITestCase):
@@ -566,7 +576,7 @@ class UserTests(MDQApiTest):
         '''Tests the user registration flow'''
 
         # Test creating a good user
-        response = self.client.post('/api/v2/users/register', {
+        response = self.client.post_anon('/api/v2/users/register', {
             'email': 'unused@motsditsquebec.com',
             'username': 'mr_unused',
             'password': '123456',
@@ -579,7 +589,7 @@ class UserTests(MDQApiTest):
         # Tests that fail creating a user
 
         ## Bad email
-        response = self.client.post('/api/v2/users/register', {
+        response = self.client.post_anon('/api/v2/users/register', {
             'email': 'invalid_email',
             'username': 'mr_unused2',
             'password': '123456',
@@ -589,7 +599,7 @@ class UserTests(MDQApiTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         ## Conflicting username
-        response = self.client.post('/api/v2/users/register', {
+        response = self.client.post_anon('/api/v2/users/register', {
             'email': 'unused2@motsditsquebec.com',
             'username': 'otheruser',
             'password': '123456',
@@ -599,7 +609,7 @@ class UserTests(MDQApiTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         ## Conflicting email
-        response = self.client.post('/api/v2/users/register', {
+        response = self.client.post_anon('/api/v2/users/register', {
             'email': 'other@motsditsquebec.com',
             'username': 'test',
             'password': '123456',
@@ -609,7 +619,7 @@ class UserTests(MDQApiTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         ## Missing data
-        response = self.client.post('/api/v2/users/register', {
+        response = self.client.post_anon('/api/v2/users/register', {
             'email': 'unused2@motsditsquebec.com',
             'username': 'test',
         }, format='json')
@@ -619,7 +629,7 @@ class UserTests(MDQApiTest):
         '''Registers a user and then activates using the validation key'''
 
         # Create a good user
-        response = self.client.post('/api/v2/users/register', {
+        response = self.client.post_anon('/api/v2/users/register', {
             'email': 'unused@motsditsquebec.com',
             'username': 'mr_unused',
             'password': '123456',
