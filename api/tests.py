@@ -283,6 +283,16 @@ class MotDitTests(MDQApiTest):
         manually_serialized = motsdits_serializers.MotDitSerializer(MotDit.objects.all(), many=True, context={'request': request}).data
         self.assertEqual(response.data['results'], manually_serialized)
 
+    def test_list_motdits_sorted(self):
+        '''Test to make sure the list view returns the right data'''
+
+        response = self.client.get('/api/v2/motsdits/?order_by=likes')
+
+        likes = [motdit['likes'] for motdit in response.data['results']]
+
+        # Make sure the like count is sorted
+        self.assertEqual(likes, sorted(likes, reverse=True))
+
     def test_flag_motdit(self):
         '''Tests that flagging a motdit sets the flag value 1 higher'''
 

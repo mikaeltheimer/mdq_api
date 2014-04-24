@@ -19,7 +19,7 @@ class ApiClient:
     def login(self, username, password):
         '''Perform a login'''
         # Request an access token
-        response = self.post("{0}/oauth2/access_token/".format(self.base_url), data={
+        response = self.post("oauth2/access_token/", data={
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'grant_type': 'password',

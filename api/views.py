@@ -35,7 +35,16 @@ class ItemViewSet(viewsets.ModelViewSet):
     '''Viewset for Mot-dit objects'''
     model = Item
     serializer_class = motsdits_serializers.ItemSerializer
+    paginated_serializer = motsdits_serializers.PaginatedItemSerializer
     filter_backends = (rest_framework.filters.DjangoFilterBackend, )
+
+    def list(self, request):
+        '''Lists items'''
+
+        queryset = sorting.sort(request, self.model.objects.all())
+        objects = get_paginated(request, queryset)
+
+        return Response(self.paginated_serializer(objects, context={'request': request}).data)
 
     @link()
     def related(self, request, pk=None):
@@ -93,7 +102,16 @@ class MotDitViewSet(viewsets.ModelViewSet):
     '''Viewset for Mot-dit objects'''
     model = MotDit
     serializer_class = motsdits_serializers.MotDitSerializer
+    paginated_serializer = motsdits_serializers.PaginatedMotDitSerializer
     permission_classes = [DefaultPermissions, MotsditsPermissions]
+
+    def list(self, request):
+        '''Lists mots-dits'''
+
+        queryset = sorting.sort(request, self.model.objects.all())
+        objects = get_paginated(request, queryset)
+
+        return Response(self.paginated_serializer(objects, context={'request': request}).data)
 
     @action(methods=['POST'])
     def flag(self, request, pk=None):
@@ -248,8 +266,6 @@ class MotDitViewSet(viewsets.ModelViewSet):
 
                 return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -258,7 +274,16 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
     model = Photo
     serializer_class = motsdits_serializers.PhotoSerializer
+    paginated_serializer = motsdits_serializers.PaginatedPhotoSerializer
     permission_classes = [DefaultPermissions, IsOwnerOrReadOnly]
+
+    def list(self, request):
+        '''Lists photos'''
+
+        queryset = sorting.sort(request, self.model.objects.all())
+        objects = get_paginated(request, queryset)
+
+        return Response(self.paginated_serializer(objects, context={'request': request}).data)
 
     def create(self, request):
         '''Create a Photo object'''
@@ -304,7 +329,16 @@ class StoryViewSet(viewsets.ModelViewSet):
 
     model = Story
     serializer_class = motsdits_serializers.StorySerializer
+    paginated_serializer = motsdits_serializers.PaginatedStorySerializer
     permission_classes = [DefaultPermissions, IsOwnerOrReadOnly]
+
+    def list(self, request):
+        '''Lists stories'''
+
+        queryset = sorting.sort(request, self.model.objects.all())
+        objects = get_paginated(request, queryset)
+
+        return Response(self.paginated_serializer(objects, context={'request': request}).data)
 
     def create(self, request):
         '''Create a Story object'''
@@ -340,6 +374,15 @@ class NewsViewSet(viewsets.ModelViewSet):
 
     model = News
     serializer_class = motsdits_serializers.NewsSerializer
+    paginated_serializer = motsdits_serializers.PaginatedNewsSerializer
+
+    def list(self, request):
+        '''Lists news'''
+
+        queryset = sorting.sort(request, self.model.objects.all())
+        objects = get_paginated(request, queryset)
+
+        return Response(self.paginated_serializer(objects, context={'request': request}).data)
 
     @link()
     def comments(self, request, pk=None):
@@ -358,7 +401,16 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     model = Comment
     serializer_class = motsdits_serializers.CommentSerializer
+    paginated_serializer = motsdits_serializers.PaginatedCommentSerializer
     permission_classes = [DefaultPermissions, IsOwnerOrReadOnly]
+
+    def list(self, request):
+        '''Lists comments'''
+
+        queryset = sorting.sort(request, self.model.objects.all())
+        objects = get_paginated(request, queryset)
+
+        return Response(self.paginated_serializer(objects, context={'request': request}).data)
 
     def create(self, request):
         '''Create a Comment object'''
