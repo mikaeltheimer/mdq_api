@@ -616,8 +616,13 @@ class UserValidate(APIView):
     def get(self, request, validation_code=None):
         '''Visit the page of a validation code, and you're valid!'''
 
-        user = get_user_model().objects.get(validation_code=validation_code)
-        user.validated = True
-        user.save()
+        try:
+            user = get_user_model().objects.get(validation_code=validation_code)
+            user.validated = True
+            user.save()
 
-        return Response(self.serializer(user).data)
+            return Response(self.serializer(user).data)
+        except get_user_model().DoesNotExist as e:
+            return Response({'success': False, 'message': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
