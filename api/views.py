@@ -623,6 +623,6 @@ class UserValidate(APIView):
 
             return Response(self.serializer(user).data)
         except get_user_model().DoesNotExist as e:
-            return Response({'success': False, 'message': str(e)}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'success': False, 'message': 'Invalid validation code'}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
