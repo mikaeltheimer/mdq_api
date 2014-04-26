@@ -570,34 +570,42 @@ class UserRegister(APIView):
     def post(self, request):
         '''POST a new user object to be registered'''
 
-        # Create a user
         try:
-            user = get_user_model()(
-                email=request.DATA['email'],
-                username=request.DATA['username'],
-                password=request.DATA['password'],
-                first_name=request.DATA['first_name'],
-                last_name=request.DATA['last_name'],
-            )
+            with transaction.atomic():
 
-            user.full_clean()
-            user.save()
-        except (ValidationError, KeyError) as e:
-            return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                # Create a user
+                try:
+                    user = get_user_model()(
+                        email=request.DATA['email'],
+                        username=request.DATA['username'],
+                        first_name=request.DATA['first_name'],
+                        last_name=request.DATA['last_name'],
+                    )
 
-        # Default to sending of the email (otherwise we're doing something funky like tests)
-        if request.DATA.get('send_email', True):
-            from django.core.mail import EmailMultiAlternatives
+                    # Set the password (ensures it gets hashed properly)
+                    user.set_password(request.DATA['password'])
 
-            link = request.build_absolute_uri(reverse('validate-user', args=[user.validation_code]))
-            subject, from_email, to = 'Verifiez votre compte Mots-dits Quebec', 'accounts@motsditsquebec.com', user.email
-            text_content = 'Pour verifier, cliquez le lien ci-dessus {link}'.format(link=link)
-            html_content = 'Pour verifier, cliquez le lien ci-dessus<br /><br /><a href="{link}">{link}</a>'.format(link=link)
-            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
+                    user.full_clean()
+                    user.save()
+                except (ValidationError, KeyError) as e:
+                    return Response({'success': False, 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'success': True, 'id': user.id}, status=status.HTTP_201_CREATED)
+                # Default to sending of the email (otherwise we're doing something funky like tests)
+                if request.DATA.get('send_email', True):
+                    from django.core.mail import EmailMultiAlternatives
+
+                    link = request.build_absolute_uri(reverse('validate-user', args=[user.validation_code]))
+                    subject, from_email, to = 'Verifiez votre compte Mots-dits Quebec', 'accounts@motsditsquebec.com', user.email
+                    text_content = 'Pour verifier, cliquez le lien ci-dessus {link}'.format(link=link)
+                    html_content = 'Pour verifier, cliquez le lien ci-dessus<br /><br /><a href="{link}">{link}</a>'.format(link=link)
+                    msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
+
+                return Response({'success': True, 'id': user.id}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'success': False, 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserValidate(APIView):
