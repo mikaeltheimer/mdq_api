@@ -20,6 +20,7 @@ from django.core.validators import EmailValidator, ValidationError
 from django.core.urlresolvers import reverse
 
 from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
+from motsdits.signals import motdit_created
 from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly, DefaultPermissions
 
 import api.serializers.motsdits as motsdits_serializers
@@ -249,20 +250,27 @@ class MotDitViewSet(viewsets.ModelViewSet):
 
                 # Create story, if supplied
                 if data.get('story'):
-                    Story.objects.create(
+                    story = Story.objects.create(
                         motdit=motdit,
                         text=data['story'],
                         created_by=request.user
                     )
+                else:
+                    story = None
 
                 # Add a photo, if supplied
                 if request.FILES.get('photo'):
                     # Create the photo
-                    Photo.objects.create(
+                    photo = Photo.objects.create(
                         picture=request.FILES['photo'],
                         motdit=motdit,
                         created_by=request.user
                     )
+                else:
+                    photo = None
+
+                # Finally, dispatch the creation signal
+                motdit_created.send(request.user.__class__, created_by=request.user, motdit=motdit, photo=photo, story=story)
 
                 return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
         except Exception as e:

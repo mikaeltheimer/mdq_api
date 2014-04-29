@@ -155,6 +155,7 @@ class News(MDQBaseModel):
     motdit = models.ForeignKey(MotDit)
     photo = models.ForeignKey(Photo, null=True, blank=True)
     story = models.ForeignKey(Story, null=True, blank=True)
+    user = models.ForeignKey(get_user_model(), null=True, blank=True, related_name='news_about')
 
     def __str__(self):
         return str(self.action)

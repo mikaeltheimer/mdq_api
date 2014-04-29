@@ -177,7 +177,7 @@ NEWS_TYPE_CHOICES = (
     (NEWS_LIKED_PHOTO, 'Liked Photo'),
 
     # Story news
-    (NEWS_LIKED_STORY, 'Liked Photo'),
+    (NEWS_LIKED_STORY, 'Liked Story'),
 
 )
 

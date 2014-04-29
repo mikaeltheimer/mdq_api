@@ -1,13 +1,16 @@
 # from django.core.urlresolvers import reverse
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from motsdits.models import MotDit, Item, Photo, Story
+from motsdits.models import MotDit, Item, Photo, Story, News
 from api.serializers import motsdits as motsdits_serializers
 import json
+
+from datetime import datetime, timedelta
 
 
 NEW_PASSWORD = 'password'
@@ -485,6 +488,33 @@ class NewsTests(MDQApiTest):
         # And make sure that each comment returned is related to this news item
         for comment in response.data['results']:
             self.assertEqual(comment['news_item'], 1)
+
+    def test_create_motdit_news(self):
+        '''Tests that news gets generated when creating a motdit, whether or not you're the first'''
+
+        # Create it
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'la banquise',
+            'action': 'eat',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # only get recent news items (ensures one got created)
+        news_item = News.objects.filter(created__gt=datetime.utcnow() - timedelta(minutes=1)).order_by('-created')[0]
+        self.assertEqual(news_item.action, settings.NEWS_CREATED_MOTDIT)
+        self.assertEqual(news_item.created_by, self.user)
+        self.assertEqual(news_item.motdit.id, response.data['id'])
+
+        # Make sure the alt user can actually create stuff
+        self.alt_user.validated = True
+        self.alt_user.save()
+
+        # Create it again
+        response = self.alt_client.post('/api/v2/motsdits/', {
+            'what': 'la banquise',
+            'action': 'eat',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 class CommentTests(MDQApiTest):
