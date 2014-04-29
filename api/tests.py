@@ -500,7 +500,11 @@ class NewsTests(MDQApiTest):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # only get recent news items (ensures one got created)
-        news_item = News.objects.filter(created__gt=datetime.utcnow() - timedelta(minutes=1)).order_by('-created')[0]
+        news_item = News.objects.filter(
+            action=settings.NEWS_CREATED_MOTDIT,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+
         self.assertEqual(news_item.action, settings.NEWS_CREATED_MOTDIT)
         self.assertEqual(news_item.created_by, self.user)
         self.assertEqual(news_item.motdit.id, response.data['id'])
@@ -515,6 +519,45 @@ class NewsTests(MDQApiTest):
             'action': 'eat',
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        news_item = News.objects.filter(
+            action=settings.NEWS_CREATED_MOTDIT,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+
+        self.assertEqual(news_item.action, settings.NEWS_CREATED_MOTDIT)
+        self.assertEqual(news_item.created_by, self.alt_user)
+        self.assertEqual(news_item.motdit.id, response.data['id'])
+
+    def test_update_motdit_news(self):
+        '''Tests that news gets generated when updating a motdit'''
+
+        response = self.client.patch('/api/v2/motsdits/1/', {
+            'address': '1234 Fake Street'
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        news_item = News.objects.filter(
+            action=settings.NEWS_UPDATED_MOTDIT,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+        self.assertEqual(news_item.created_by, self.user)
+        self.assertEqual(news_item.motdit.id, response.data['id'])
+
+    def test_like_motdit_news(self):
+        '''Tests that a news item is generated when you like a motdit'''
+
+        TEST_PK = 1
+
+        response = self.client.post('/api/v2/motsdits/{pk}/like/'.format(pk=TEST_PK), format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        news_item = News.objects.filter(
+            action=settings.NEWS_LIKED_MOTDIT,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+        self.assertEqual(news_item.created_by, self.user)
+        self.assertEqual(news_item.motdit.id, TEST_PK)
 
 
 class CommentTests(MDQApiTest):

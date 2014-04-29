@@ -20,7 +20,7 @@ from django.core.validators import EmailValidator, ValidationError
 from django.core.urlresolvers import reverse
 
 from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
-from motsdits.signals import motdit_created
+from motsdits import signals
 from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly, DefaultPermissions
 
 import api.serializers.motsdits as motsdits_serializers
@@ -132,6 +132,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
         # User wants to like this mot-dit
         if request.method == 'POST':
             motdit.likes.add(request.user)
+            signals.motdit_liked.send(request.user.__class__, created_by=request.user, motdit=motdit)
             return Response(status=status.HTTP_201_CREATED)
 
         # Otherwise we can do a DELETE
@@ -270,11 +271,26 @@ class MotDitViewSet(viewsets.ModelViewSet):
                     photo = None
 
                 # Finally, dispatch the creation signal
-                motdit_created.send(request.user.__class__, created_by=request.user, motdit=motdit, photo=photo, story=story)
+                signals.motdit_created.send(request.user.__class__, created_by=request.user, motdit=motdit, photo=photo, story=story)
 
                 return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        '''Allows for a PATCH request to the motdit'''
+
+        motdit = MotDit.objects.get(pk=pk)
+
+        if request.DATA.get('address'):
+            motdit.where.address = request.DATA['address']
+
+        if request.DATA.get('website'):
+            motdit.where.website = request.DATA['website']
+
+        signals.motdit_updated.send(request.user.__class__, created_by=request.user, motdit=motdit)
+
+        return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_200_OK)
 
 
 class PhotoViewSet(viewsets.ModelViewSet):

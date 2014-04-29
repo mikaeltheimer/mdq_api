@@ -32,3 +32,19 @@ def handle_create_motdit(created_by=None, motdit=None, photo=None, story=None, *
         # and update the motdit score
         motdit.score += 1
         motdit.save()
+
+
+@receiver(motdit_updated)
+def handle_update_motdit(created_by=None, motdit=None, **kwargs):
+    '''Handles generating news when updating a motdit'''
+
+    if created_by and motdit:
+        News.objects.create(action=settings.NEWS_UPDATED_MOTDIT, created_by=created_by, motdit=motdit)
+
+
+@receiver(motdit_liked)
+def handle_like_motdit(created_by=None, motdit=None, **kwargs):
+    '''Handles generating news when liking a motdit'''
+
+    if created_by and motdit:
+        News.objects.create(action=settings.NEWS_LIKED_MOTDIT, created_by=created_by, motdit=motdit)
