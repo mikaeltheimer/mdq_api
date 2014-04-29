@@ -149,6 +149,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
         # User wants to like this mot-dit
         if request.method == 'POST':
             motdit.favourites.add(request.user)
+            signals.motdit_favourited.send(request.user.__class__, created_by=request.user, motdit=motdit)
             return Response(status=status.HTTP_201_CREATED)
 
         # Otherwise we can do a DELETE
