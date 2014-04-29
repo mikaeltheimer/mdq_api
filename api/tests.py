@@ -560,7 +560,7 @@ class NewsTests(MDQApiTest):
         self.assertEqual(news_item.motdit.id, TEST_PK)
 
     def test_favourite_motdit_news(self):
-        '''Tests that a news item is generated when you like a motdit'''
+        '''Tests that a news item is generated when you favourite a motdit'''
 
         TEST_PK = 1
 
@@ -573,6 +573,36 @@ class NewsTests(MDQApiTest):
         ).order_by('-id')[0]
         self.assertEqual(news_item.created_by, self.user)
         self.assertEqual(news_item.motdit.id, TEST_PK)
+
+    def test_like_photo_news(self):
+        '''Tests that a news item is generated when you like a photo'''
+
+        TEST_PK = 1
+
+        response = self.client.post('/api/v2/photos/{pk}/like/'.format(pk=TEST_PK), format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        news_item = News.objects.filter(
+            action=settings.NEWS_LIKED_PHOTO,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+        self.assertEqual(news_item.created_by, self.user)
+        self.assertEqual(news_item.photo.id, TEST_PK)
+
+    def test_like_story_news(self):
+        '''Tests that a news item is generated when you like a story'''
+
+        TEST_PK = 1
+
+        response = self.client.post('/api/v2/stories/{pk}/like/'.format(pk=TEST_PK), format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        news_item = News.objects.filter(
+            action=settings.NEWS_LIKED_STORY,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+        self.assertEqual(news_item.created_by, self.user)
+        self.assertEqual(news_item.photo.id, TEST_PK)
 
 
 class CommentTests(MDQApiTest):
