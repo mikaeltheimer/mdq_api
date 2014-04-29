@@ -477,7 +477,7 @@ class StoryTests(MDQApiTest):
 class NewsTests(MDQApiTest):
     '''Tests for the news API'''
 
-    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_news.json', 'test_comments.json']
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_photos.json', 'test_news.json', 'test_comments.json', 'test_stories.json']
 
     def test_news_comments(self):
         '''Tests retrieving all comments for a news item'''
@@ -602,7 +602,7 @@ class NewsTests(MDQApiTest):
             created__gt=datetime.utcnow() - timedelta(minutes=1)
         ).order_by('-id')[0]
         self.assertEqual(news_item.created_by, self.user)
-        self.assertEqual(news_item.photo.id, TEST_PK)
+        self.assertEqual(news_item.story.id, TEST_PK)
 
 
 class CommentTests(MDQApiTest):

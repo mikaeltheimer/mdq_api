@@ -56,3 +56,19 @@ def handle_favourite_motdit(created_by=None, motdit=None, **kwargs):
 
     if created_by and motdit:
         News.objects.create(action=settings.NEWS_FAVOURITED_MOTDIT, created_by=created_by, motdit=motdit)
+
+
+@receiver(photo_liked)
+def handle_like_photo(created_by=None, motdit=None, photo=None, **kwargs):
+    '''Handles generating news when liking a photo'''
+
+    if created_by and photo:
+        News.objects.create(action=settings.NEWS_LIKED_PHOTO, created_by=created_by, motdit=motdit, photo=photo)
+
+
+@receiver(story_liked)
+def handle_like_story(created_by=None, motdit=None, story=None, **kwargs):
+    '''Handles generating news when liking a story'''
+
+    if created_by and story:
+        News.objects.create(action=settings.NEWS_LIKED_STORY, created_by=created_by, motdit=motdit, story=story)

@@ -341,6 +341,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
         # User wants to like this photo
         if request.method == 'POST':
             photo.likes.add(request.user)
+            signals.photo_liked.send(request.user.__class__, created_by=request.user, motdit=photo.motdit, photo=photo)
             return Response(status=status.HTTP_201_CREATED)
 
         # Otherwise we can do a DELETE
@@ -386,6 +387,7 @@ class StoryViewSet(viewsets.ModelViewSet):
         # User wants to like this photo
         if request.method == 'POST':
             story.likes.add(request.user)
+            signals.story_liked.send(request.user.__class__, created_by=request.user, motdit=story.motdit, story=story)
             return Response(status=status.HTTP_201_CREATED)
 
         # Otherwise we can do a DELETE
