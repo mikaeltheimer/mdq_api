@@ -559,6 +559,21 @@ class NewsTests(MDQApiTest):
         self.assertEqual(news_item.created_by, self.user)
         self.assertEqual(news_item.motdit.id, TEST_PK)
 
+    def test_favourite_motdit_news(self):
+        '''Tests that a news item is generated when you like a motdit'''
+
+        TEST_PK = 1
+
+        response = self.client.post('/api/v2/motsdits/{pk}/favourite/'.format(pk=TEST_PK), format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        news_item = News.objects.filter(
+            action=settings.NEWS_FAVOURITED_MOTDIT,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+        self.assertEqual(news_item.created_by, self.user)
+        self.assertEqual(news_item.motdit.id, TEST_PK)
+
 
 class CommentTests(MDQApiTest):
     '''Tests for the comment API'''

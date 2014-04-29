@@ -48,3 +48,11 @@ def handle_like_motdit(created_by=None, motdit=None, **kwargs):
 
     if created_by and motdit:
         News.objects.create(action=settings.NEWS_LIKED_MOTDIT, created_by=created_by, motdit=motdit)
+
+
+@receiver(motdit_favourited)
+def handle_favourite_motdit(created_by=None, motdit=None, **kwargs):
+    '''Handles generating news when liking a motdit'''
+
+    if created_by and motdit:
+        News.objects.create(action=settings.NEWS_FAVOURITED_MOTDIT, created_by=created_by, motdit=motdit)
