@@ -77,7 +77,7 @@ class ItemAutocomplete(APIView):
         return Response([item.name for item in Item.objects.filter(name__icontains=name)[:10]])
 
 
-def resolve_item(value, item_type, user=None):
+def resolve_item(value, item_type, user=None, address=None, website=None):
     '''Given a value supplied to the API, resolve it to a discrete Item object'''
 
     item = None
@@ -89,11 +89,22 @@ def resolve_item(value, item_type, user=None):
         value = value.strip()
         try:
             item = Item.objects.get(type=item_type, name__iexact=value)
+
+            # Add address and website, if available
+            if address and not item.address:
+                item.address = address
+            if website and not item.website:
+                item.website = website
+
+            item.save()
+
         except Item.DoesNotExist:
             item = Item.objects.create(
                 type=item_type,
                 name=value,
-                created_by=user
+                created_by=user,
+                address=address,
+                website=website
             )
 
     return item
@@ -196,7 +207,7 @@ class MotDitViewSet(viewsets.ModelViewSet):
 
         # Get the related what an where items
         what = resolve_item(data.get('what'), settings.WHAT, user=request.user)
-        where = resolve_item(data.get('where'), settings.WHERE, user=request.user)
+        where = resolve_item(data.get('where'), settings.WHERE, user=request.user, address=data.get('address'), website=data.get('website'))
 
         if not what and not where:
             return Response({'error': 'Must supply at least one of what or where'}, status=status.HTTP_406_NOT_ACCEPTABLE)

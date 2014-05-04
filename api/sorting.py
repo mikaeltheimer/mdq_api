@@ -2,7 +2,29 @@
 
 @author Stephen Young
 """
-from django.db.models import Count
+
+from django.conf import settings
+from django.db.models import Count, Q
+from motsdits.models import MotDit
+
+
+def geonear(queryset, lat, lng, distance=100):
+    '''Returns a queryset of everything within <distance> of the supplied <lat>,<lng> pair'''
+
+    from django.db import connection
+    cursor = connection.cursor()
+
+    cursor.execute("""SELECT id, (
+        6371 * acos( cos( radians({lat}) ) * cos( radians( lat ) ) *
+        cos( radians( lng ) - radians({lng}) ) + sin( radians({lat}) ) *
+        sin( radians( lat ) ) ) )
+        AS distance FROM motsdits_item HAVING distance < {distance}
+        ORDER BY distance ASC""".format(lat=lat, lng=lng, distance=distance))
+
+    # All IDs of nearby values, sorted by distance to the lat,lng pair
+    nearest = [row[0] for row in cursor.fetchall()]
+
+    return queryset.filter(Q(what__in=nearest) | Q(where__in=nearest))
 
 
 def sort(request, queryset):
@@ -18,5 +40,11 @@ def sort(request, queryset):
         if request.QUERY_PARAMS.get('order', 'desc').lower() != 'asc':
             sort_key = '-{}'.format(sort_key)
         return queryset.order_by(sort_key)
+
+    # Specific additional parameters to support
+    elif request.QUERY_PARAMS.get('nearby') and queryset.model == MotDit:
+        # Extract the latitude + longitude
+        lat, lng = map(float, request.QUERY_PARAMS.get('nearby').split(','))
+        return geonear(queryset, lat, lng, request.QUERY_PARAMS.get('radius', settings.DEFAULT_SEARCH_RADIUS))
 
     return queryset

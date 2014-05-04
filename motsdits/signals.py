@@ -4,8 +4,43 @@
 
 from django.conf import settings
 from django.dispatch import receiver, Signal
-from motsdits.models import News
+from django.db.models.signals import pre_save
+from motsdits.models import News, Item
 
+import requests
+import json
+from unidecode import unidecode
+
+
+# MODEL SIGNALS
+@receiver(pre_save, sender=Item)
+def geocode_item(sender, instance, *args, **kwargs):
+    '''Ensures that if an item has an address, we try to give it a lat/lng'''
+
+    # Check if the address has changed
+    if instance.pk:
+        existing = Item.objects.get(pk=instance.pk)
+        address_changed = existing.address == instance.address
+    else:
+        # If it's new, the address has necessarily changed
+        address_changed = True
+
+    # If the address has changed, or we don't already have a lat/lng pair
+    if instance.address and (not instance.lat or not instance.lng or address_changed):
+
+        try:
+            # We always geocode in Quebec using google maps, to avoid ambiguity
+            url = "http://maps.googleapis.com/maps/api/geocode/json?address={0},Quebec,Canada&sensor=false"
+            geocoded = json.loads(requests.get(url.format(unidecode(instance.address.replace(' ', '+')))).content)
+
+            instance.lat = float(geocoded['results'][0]['geometry']['location']['lat'])
+            instance.lng = float(geocoded['results'][0]['geometry']['location']['lng'])
+
+        except Exception:
+            pass
+
+
+# CUSTOM SIGNALS FOR NEWS
 # Correspond directly to NEWS_TYPE_CHOICES in settings.py
 
 # Motdit signals

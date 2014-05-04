@@ -115,6 +115,9 @@ AUTH_USER_MODEL = 'accounts.MDQUser'
 # Set some vars to represent the two types of items
 WHAT, WHERE = 'what', 'where'
 
+# Default distance we search at
+DEFAULT_SEARCH_RADIUS = 100
+
 # Configure CORS
 CORS_ALLOW_HEADERS = (
     'x-requested-with',
