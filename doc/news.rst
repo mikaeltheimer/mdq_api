@@ -3,7 +3,7 @@ News
 
 http://api.motsditsquebec.com/api/v2/news/
 
-News items **will be** auto-generated whenever a user performs certain actions within the application (see actions_ below)
+News items are **auto-generated** whenever a user performs certain actions within the application (see actions_ below)
 
 
 Listing News

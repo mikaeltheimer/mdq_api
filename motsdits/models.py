@@ -111,6 +111,10 @@ class MotDit(MDQBaseModel):
 
         return list(tags)
 
+    def recalculate_score(self):
+        '''Recalculates the score for this Mot-Dit'''
+        # @TODO: move all score calculations here
+
 
 class Photo(MDQBaseModel):
     '''Photos for MDQ'''

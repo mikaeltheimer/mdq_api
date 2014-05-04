@@ -57,6 +57,9 @@ def handle_favourite_motdit(created_by=None, motdit=None, **kwargs):
     if created_by and motdit:
         News.objects.create(action=settings.NEWS_FAVOURITED_MOTDIT, created_by=created_by, motdit=motdit)
 
+        motdit.score += 1
+        motdit.save()
+
 
 @receiver(photo_liked)
 def handle_like_photo(created_by=None, motdit=None, photo=None, **kwargs):
