@@ -19,8 +19,11 @@ def geocode_item(sender, instance, *args, **kwargs):
 
     # Check if the address has changed
     if instance.pk:
-        existing = Item.objects.get(pk=instance.pk)
-        address_changed = existing.address == instance.address
+        try:
+            existing = Item.objects.get(pk=instance.pk)
+            address_changed = existing.address == instance.address
+        except Item.DoesNotExist:
+            address_changed = True
     else:
         # If it's new, the address has necessarily changed
         address_changed = True
