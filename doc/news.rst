@@ -76,3 +76,6 @@ This endpoint provides a **paginated** list of compact comment_ objects that are
 .. _photo: photos.html
 .. _user: users.html
 .. _actions: #actions
+.. _motdit: motsdits.html
+.. _story: stories.html
+.. _comment: comments.html
