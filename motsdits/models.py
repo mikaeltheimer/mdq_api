@@ -177,8 +177,8 @@ class News(MDQBaseModel):
     story = models.ForeignKey(Story, null=True, blank=True)
     user = models.ForeignKey(get_user_model(), null=True, blank=True, related_name='news_about')
 
-    question = models.ForeignKey(Question, null=True, blank=True)
-    answer = models.ForeignKey(Answer, null=True, blank=True)
+    question = models.ForeignKey(Question, null=True, blank=True, related_name='news_about')
+    answer = models.ForeignKey(Answer, null=True, blank=True, related_name='news_about')
 
     def __str__(self):
         return str(self.action)
