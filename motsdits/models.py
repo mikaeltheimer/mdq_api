@@ -116,6 +116,17 @@ class MotDit(MDQBaseModel):
         # @TODO: move all score calculations here
 
 
+class Question(MotDit):
+    '''A question is identical to a mot-dit except that it gets paired with a set of answer objects'''
+
+
+class Answer(MDQBaseModel):
+    '''An individual answer, tied directly to a MotDit object - tracks creation, creator etc.'''
+
+    question = models.ForeignKey(Question, related_name='answers')
+    answer = models.ForeignKey(MotDit, related_name='answer_to')
+
+
 class Photo(MDQBaseModel):
     '''Photos for MDQ'''
 
