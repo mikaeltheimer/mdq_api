@@ -58,6 +58,10 @@ photo_liked = Signal(providing_args=["created_by", "photo"])
 # Story signals
 story_liked = Signal(providing_args=["created_by", "photo"])
 
+# Question signals
+question_asked = Signal(providing_args=["created_by", "question"])
+question_answered = Signal(providing_args=["created_by", "question", "answer"])
+
 
 # Signal handlers
 @receiver(motdit_created)
@@ -113,3 +117,19 @@ def handle_like_story(created_by=None, motdit=None, story=None, **kwargs):
 
     if created_by and story:
         News.objects.create(action=settings.NEWS_LIKED_STORY, created_by=created_by, motdit=motdit, story=story)
+
+
+@receiver(question_asked)
+def handle_ask_question(created_by=None, question=None, **kwargs):
+    '''Handles generating news when liking a story'''
+
+    if created_by and question:
+        News.objects.create(action=settings.NEWS_ASKED_QUESTION, created_by=created_by, question=question)
+
+
+@receiver(question_answered)
+def handle_answer_question(created_by=None, question=None, answer=None, motdit=None, **kwargs):
+    '''Handles generating news when liking a story'''
+
+    if created_by and question:
+        News.objects.create(action=settings.NEWS_ANSWERED_QUESTION, created_by=created_by, question=question, answer=answer, motdit=motdit)

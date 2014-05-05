@@ -1,5 +1,5 @@
 from django.contrib import admin
-from motsdits.models import Action, Tag, Item, MotDit, Photo, Story, News, Comment
+from motsdits.models import Action, Tag, Item, MotDit, Question, Answer, Photo, Story, News, Comment
 
 
 class ActionAdmin(admin.ModelAdmin):
@@ -16,6 +16,14 @@ class ItemAdmin(admin.ModelAdmin):
 
 class MotDitAdmin(admin.ModelAdmin):
     list_display = ['action', 'what', 'where']
+
+
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ['action', 'what', 'where', 'created_by']
+
+
+class AnswerAdmin(admin.ModelAdmin):
+    list_display = ['question', 'answer', 'created_by', 'score']
 
 
 class PhotoAdmin(admin.ModelAdmin):
@@ -37,6 +45,8 @@ admin.site.register(Action, ActionAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Item, ItemAdmin)
 admin.site.register(MotDit, MotDitAdmin)
+admin.site.register(Question, QuestionAdmin)
+admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Photo, PhotoAdmin)
 admin.site.register(Story, StoryAdmin)
 admin.site.register(News, NewsAdmin)

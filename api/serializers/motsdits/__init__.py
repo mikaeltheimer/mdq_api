@@ -1,4 +1,4 @@
-from motsdits.models import MotDit, Item, Photo, Story, News, Comment
+from motsdits.models import MotDit, Item, Question, Answer, Photo, Story, News, Comment
 
 from rest_framework import serializers
 from rest_framework import pagination
@@ -73,6 +73,57 @@ class ItemSerializer(serializers.ModelSerializer):
 class PaginatedItemSerializer(pagination.PaginationSerializer):
     class Meta:
         object_serializer_class = ItemSerializer
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    '''Ensures that related objects get serialized'''
+
+    created_by = accounts_compact.CompactUserSerializer()
+
+    action = serializers.SerializerMethodField('action_verb')
+    what = motsdits_compact.CompactItemSerializer()
+    where = motsdits_compact.CompactItemSerializer()
+
+    answers = serializers.SerializerMethodField('count_answers')
+
+    class Meta:
+        model = Question
+        depth = 1
+        fields = (
+            'id', 'created_by',
+            'action', 'what', 'where',
+            'score', 'answers'
+        )
+
+    def count_answers(self, obj):
+        '''Return the count of answers for this question'''
+        return obj.answers.count()
+
+    def action_verb(self, obj):
+        '''Flattens the action to just the verb'''
+        return obj.action.verb
+
+
+class PaginatedQuestionSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = QuestionSerializer
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    '''Creates a small version of an Answer object'''
+
+    created_by = accounts_compact.CompactUserSerializer()
+    question = QuestionSerializer()
+    answer = MotDitSerializer()
+
+    class Meta:
+        model = Answer
+        fields = ('id', 'created_by', 'question', 'score', 'motdit', )
+
+
+class PaginatedAnswerSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = AnswerSerializer
 
 
 class PhotoSerializer(serializers.ModelSerializer):

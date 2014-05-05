@@ -1,0 +1,16 @@
+[
+    {
+        "fields": {
+            "answer": 1,
+            "approved": true,
+            "created": "2014-05-05T20:13:39",
+            "created_by": 1,
+            "flags": 0,
+            "question": 1,
+            "score": 0.0,
+            "updated": "2014-05-05T20:13:55"
+        },
+        "model": "motsdits.answer",
+        "pk": 1
+    }
+]

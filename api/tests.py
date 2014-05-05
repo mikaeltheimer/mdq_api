@@ -6,7 +6,7 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from motsdits.models import MotDit, Item, Photo, Story, News
+from motsdits.models import MotDit, Item, Question, Photo, Story, News
 from api.serializers import motsdits as motsdits_serializers
 import json
 
@@ -800,3 +800,54 @@ class UserTests(MDQApiTest):
         valid_user = get_user_model().objects.get(pk=user_id)
         self.assertTrue(valid_user.validated)
         self.assertTrue(valid_user.is_active)
+
+
+class QuestionTests(MDQApiTest):
+    '''Tests for the mot-dit API'''
+
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_questions.json', 'test_answers.json']
+
+    def test_create_question(self):
+        '''Ensure we can create a question'''
+
+        response = self.client.post('/api/v2/questions/', {
+            'what': 'a poutine',
+            'where': 'montreal',
+            'action': 'eat'
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # @TODO: more checks here
+
+    def test_answer_question_by_id(self):
+        '''Ensure we can answer a question'''
+
+        response = self.client.post('/api/v2/questions/1/answers/', {
+            'motdit': 6
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        question = Question.objects.get(pk=1)
+
+        # Make sure the answer is in there
+        self.assertIn(response.data['id'], [answer.pk for answer in question.answers.all()])
+
+    def test_answer_question_with_motdit(self):
+        '''Ensure we can answer a question with a fresh motdit'''
+
+        response = self.client.post('/api/v2/questions/1/answers/', {
+            'motdit': {
+                'what': 'some donuts',
+                'where': 'chez boris',
+                'action': 'eat',
+                'tags': ['noms', 'so great', 'wow']
+            }
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        question = Question.objects.get(pk=1)
+
+        # Make sure the answer is in there
+        self.assertIn(response.data['id'], [answer.pk for answer in question.answers.all()])

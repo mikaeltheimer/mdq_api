@@ -7,25 +7,26 @@ Generates all the necessary viewsets to serve the API
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
+from django.core.validators import EmailValidator, ValidationError
+from django.core.urlresolvers import reverse, resolve
 
 # Django plugins
 from rest_framework import viewsets, status
 from rest_framework.decorators import link, action
 from rest_framework.permissions import AllowAny
 import rest_framework.filters
+from rest_framework.request import clone_request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Q
-from django.core.validators import EmailValidator, ValidationError
-from django.core.urlresolvers import reverse
 
-from motsdits.models import Action, Item, MotDit, Tag, Photo, Story, News, Comment
+from motsdits.models import Action, Item, MotDit, Question, Answer, Tag, Photo, Story, News, Comment
 from motsdits import signals
 from api.permissions import MotsditsPermissions, IsOwnerOrReadOnly, DefaultPermissions
 
 import api.serializers.motsdits as motsdits_serializers
-from api.serializers.motsdits import motsdits_compact
 import api.serializers.accounts as accounts_serializers
+from api.serializers.motsdits import motsdits_compact
 
 # Pagination helper function
 from pagination import get_paginated
@@ -110,6 +111,105 @@ def resolve_item(value, item_type, user=None, address=None, website=None):
     return item
 
 
+def create_motdit(request, data, serializer_class=motsdits_serializers.MotDitSerializer):
+    '''Attempts to create a motdit from a data dictionary - returns a Response object'''
+
+    # action
+    try:
+        if isinstance(data.get('action'), int):
+            verb = Action.objects.get(pk=data['action'])
+        elif isinstance(data.get('action'), basestring):
+            verb = Action.objects.get(verb=data['action'])
+        else:
+            return Response({'error': 'Must supply an action'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+    except Action.DoesNotExist:
+        return Response({'error': 'Action {} does not exist'.format(data['action'])}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    # Get the related what an where items
+    what = resolve_item(data.get('what'), settings.WHAT, user=request.user)
+    where = resolve_item(data.get('where'), settings.WHERE, user=request.user, address=data.get('address'), website=data.get('website'))
+
+    if not what and not where:
+        return Response({'error': 'Must supply at least one of what or where'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    try:
+        with transaction.atomic():
+
+            motdit_data = {
+                'action': verb,
+                'defaults': {'created_by': request.user}
+            }
+
+            if what:
+                motdit_data['what'] = what
+            if where:
+                motdit_data['where'] = where
+
+            # Create the motdit
+            motdit, created = MotDit.objects.get_or_create(**motdit_data)
+
+            if not created:
+                # @TODO: Increase score every time this happens!
+                pass
+
+            # If a string is passed, we take tags as a comma separated list
+            if isinstance(data.get('tags', []), basestring):
+                tags = [t.strip() for t in data['tags'].split(',') if t.strip()]
+            else:
+                tags = data.get('tags')
+
+            if isinstance(tags, list):
+                for tag_name in tags:
+                    try:
+                        tag = Tag.objects.get(name__iexact=tag_name)
+                    except Tag.DoesNotExist:
+                        tag = Tag.objects.create(
+                            name=tag_name,
+                            created_by=request.user
+                        )
+
+                    # Add the tag to the what, if specified
+                    if what:
+                        what.tags.add(tag)
+
+                    # And add the tag to the where as well
+                    if where:
+                        where.tags.add(tag)
+            elif not tags:
+                # allow passing tags: None to the endpoint
+                pass
+            else:
+                raise ValueError('Tags must be supplied as a list or comma separated string')
+
+            # Create story, if supplied
+            if data.get('story'):
+                story = Story.objects.create(
+                    motdit=motdit,
+                    text=data['story'],
+                    created_by=request.user
+                )
+            else:
+                story = None
+
+            # Add a photo, if supplied
+            if request.FILES.get('photo'):
+                # Create the photo
+                photo = Photo.objects.create(
+                    picture=request.FILES['photo'],
+                    motdit=motdit,
+                    created_by=request.user
+                )
+            else:
+                photo = None
+
+            # Finally, dispatch the creation signal
+            signals.motdit_created.send(request.user.__class__, created_by=request.user, motdit=motdit, photo=photo, story=story)
+
+            return Response(serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class MotDitViewSet(viewsets.ModelViewSet):
     '''Viewset for Mot-dit objects'''
     model = MotDit
@@ -192,6 +292,42 @@ class MotDitViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         '''Create a MotDit object'''
+        return create_motdit(request, request.DATA, serializer_class=self.serializer_class)
+
+    def partial_update(self, request, pk=None):
+        '''Allows for a PATCH request to the motdit'''
+
+        motdit = MotDit.objects.get(pk=pk)
+
+        if request.DATA.get('address'):
+            motdit.where.address = request.DATA['address']
+
+        if request.DATA.get('website'):
+            motdit.where.website = request.DATA['website']
+
+        signals.motdit_updated.send(request.user.__class__, created_by=request.user, motdit=motdit)
+
+        return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_200_OK)
+
+
+class QuestionViewSet(viewsets.ModelViewSet):
+    '''Encapsulates the base motdit views'''
+
+    model = Question
+    serializer_class = motsdits_serializers.QuestionSerializer
+    paginated_serializer = motsdits_serializers.PaginatedQuestionSerializer
+    permission_classes = [DefaultPermissions, MotsditsPermissions]
+
+    def list(self, request):
+        '''Lists mots-dits'''
+
+        queryset = sorting.sort(request, self.model.objects.all())
+        objects = get_paginated(request, queryset)
+
+        return Response(self.paginated_serializer(objects, context={'request': request}).data)
+
+    def create(self, request):
+        '''Create a Question object'''
         data = request.DATA
 
         # action
@@ -215,94 +351,92 @@ class MotDitViewSet(viewsets.ModelViewSet):
         try:
             with transaction.atomic():
 
-                motdit_data = {
+                # New questions are unique by the action, what, where and created_by
+                question_data = {
                     'action': verb,
-                    'defaults': {'created_by': request.user}
+                    'created_by': request.user
                 }
 
                 if what:
-                    motdit_data['what'] = what
+                    question_data['what'] = what
                 if where:
-                    motdit_data['where'] = where
+                    question_data['where'] = where
 
                 # Create the motdit
-                motdit, created = MotDit.objects.get_or_create(**motdit_data)
+                question, created = Question.objects.get_or_create(**question_data)
 
-                if not created:
-                    # @TODO: Increase score every time this happens!
-                    pass
+                if created:
+                    # Finally, dispatch the ask signal
+                    signals.question_asked.send(request.user.__class__, created_by=request.user, question=question)
 
-                # If a string is passed, we take tags as a comma separated list
-                if isinstance(data.get('tags', []), basestring):
-                    tags = [t.strip() for t in data['tags'].split(',') if t.strip()]
-                else:
-                    tags = data.get('tags')
-
-                if isinstance(tags, list):
-                    for tag_name in tags:
-                        try:
-                            tag = Tag.objects.get(name__iexact=tag_name)
-                        except Tag.DoesNotExist:
-                            tag = Tag.objects.create(
-                                name=tag_name,
-                                created_by=request.user
-                            )
-
-                        # Add the tag to the what, if specified
-                        if what:
-                            what.tags.add(tag)
-
-                        # And add the tag to the where as well
-                        if where:
-                            where.tags.add(tag)
-                elif not tags:
-                    # allow passing tags: None to the endpoint
-                    pass
-                else:
-                    raise ValueError('Tags must be supplied as a list or comma separated string')
-
-                # Create story, if supplied
-                if data.get('story'):
-                    story = Story.objects.create(
-                        motdit=motdit,
-                        text=data['story'],
-                        created_by=request.user
-                    )
-                else:
-                    story = None
-
-                # Add a photo, if supplied
-                if request.FILES.get('photo'):
-                    # Create the photo
-                    photo = Photo.objects.create(
-                        picture=request.FILES['photo'],
-                        motdit=motdit,
-                        created_by=request.user
-                    )
-                else:
-                    photo = None
-
-                # Finally, dispatch the creation signal
-                signals.motdit_created.send(request.user.__class__, created_by=request.user, motdit=motdit, photo=photo, story=story)
-
-                return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_201_CREATED)
+                return Response(self.serializer_class(question, context={'request': request}).data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def partial_update(self, request, pk=None):
-        '''Allows for a PATCH request to the motdit'''
+    @action(methods=['GET', 'POST'])
+    def answers(self, request, pk=None):
+        '''Allows users to post an answer to the question, either as a new motdit or as a motdit id'''
 
-        motdit = MotDit.objects.get(pk=pk)
+        # Load the relevant question
+        question = Question.objects.get(pk=pk)
 
-        if request.DATA.get('address'):
-            motdit.where.address = request.DATA['address']
+        # List all answers
+        if request.method == 'GET':
 
-        if request.DATA.get('website'):
-            motdit.where.website = request.DATA['website']
+            serializer = motsdits_compact.PaginatedCompactAnswerSerializer
 
-        signals.motdit_updated.send(request.user.__class__, created_by=request.user, motdit=motdit)
+            queryset = sorting.sort(request, Answer.objects.filter(question=question))
+            objects = get_paginated(request, queryset)
 
-        return Response(self.serializer_class(motdit, context={'request': request}).data, status=status.HTTP_200_OK)
+            return Response(serializer(objects, context={'request': request}).data)
+
+        # Create a new answer
+        elif request.method == 'POST':
+
+            serializer = motsdits_compact.CompactAnswerSerializer
+
+            # Either supply a discrete motdit ID
+            if isinstance(request.DATA['motdit'], int):
+                motdit = MotDit.objects.get(pk=request.DATA['motdit'])
+            else:
+
+                try:
+                    # Handle the response
+                    response = create_motdit(request, request.DATA['motdit'])
+                    motdit = MotDit.objects.get(pk=response.data['id'])
+
+                except Exception as e:
+                    return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+            answer, created = Answer.objects.get_or_create(
+                question=question,
+                answer=motdit,
+                created_by=request.user
+            )
+
+            if created:
+                signals.question_answered.send(request.user.__class__, created_by=request.user, question=question, answer=answer)
+                status_code = status.HTTP_201_CREATED
+            else:
+                status_code = status.HTTP_200_OK
+
+            return Response(serializer(answer, context={'request': request}).data, status=status_code)
+
+
+class AnswerViewSet(viewsets.ModelViewSet):
+    '''Viewset for Answer objects'''
+    model = Answer
+    serializer_class = motsdits_serializers.AnswerSerializer
+    paginated_serializer = motsdits_serializers.PaginatedAnswerSerializer
+    permission_classes = [DefaultPermissions, IsOwnerOrReadOnly]
+
+    def list(self, request):
+        '''Lists items'''
+
+        queryset = sorting.sort(request, self.model.objects.all())
+        objects = get_paginated(request, queryset)
+
+        return Response(self.paginated_serializer(objects, context={'request': request}).data)
 
 
 class PhotoViewSet(viewsets.ModelViewSet):

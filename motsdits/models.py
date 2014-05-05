@@ -30,6 +30,11 @@ class MDQBaseModel(models.Model):
     # Static score, float to allow for some funky scoring models
     score = models.FloatField(default=0)
 
+    def save(self, *args, **kwargs):
+        '''Always set the updated field before saving'''
+        self.updated = datetime.utcnow()
+        return models.Model.save(self, *args, **kwargs)
+
 
 class Action(MDQBaseModel):
     '''Action objects, should only be created within the admin'''
@@ -171,6 +176,9 @@ class News(MDQBaseModel):
     photo = models.ForeignKey(Photo, null=True, blank=True)
     story = models.ForeignKey(Story, null=True, blank=True)
     user = models.ForeignKey(get_user_model(), null=True, blank=True, related_name='news_about')
+
+    question = models.ForeignKey(Question, null=True, blank=True)
+    answer = models.ForeignKey(Answer, null=True, blank=True)
 
     def __str__(self):
         return str(self.action)

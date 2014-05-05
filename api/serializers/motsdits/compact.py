@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework import pagination
 
-from motsdits.models import Item, Photo, Story, News, Comment
+from motsdits.models import MotDit, Item, Answer, Photo, Story, News, Comment
 
 from api.serializers.accounts import compact
 
@@ -17,6 +17,66 @@ class CompactItemSerializer(serializers.ModelSerializer):
 class PaginatedCompactItemSerializer(pagination.PaginationSerializer):
     class Meta:
         object_serializer_class = CompactItemSerializer
+
+
+class CompactMotDitSerializer(serializers.ModelSerializer):
+    '''Serializer for mots-dits, less verbose'''
+
+    action = serializers.SerializerMethodField('action_verb')
+    what = CompactItemSerializer()
+    where = CompactItemSerializer()
+
+    likes = serializers.SerializerMethodField('count_likes')
+    favourites = serializers.SerializerMethodField('count_favourites')
+    user_likes = serializers.SerializerMethodField('does_user_like')
+
+    class Meta:
+        model = MotDit
+        depth = 1
+        fields = (
+            'id',
+            'action', 'what', 'where',
+            'score', 'likes', 'favourites',
+            'user_likes'
+        )
+
+    def does_user_like(self, obj):
+        '''Check if the user likes this object'''
+        if self.context.get('request'):
+            return self.context['request'].user in obj.likes.all()
+
+    def count_favourites(self, obj):
+        '''Return the count of users that have favourited this motdit'''
+        return obj.favourites.count()
+
+    def count_likes(self, obj):
+        '''Returns the count of users that like this motdit'''
+        return obj.likes.count()
+
+    def action_verb(self, obj):
+        '''Flattens the action to just the verb'''
+        return obj.action.verb
+
+
+class PaginatedCompactMotDitSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = CompactMotDitSerializer
+
+
+class CompactAnswerSerializer(serializers.ModelSerializer):
+    '''Creates a small version of an Answer object'''
+
+    created_by = compact.CompactUserSerializer()
+    answer = CompactMotDitSerializer()
+
+    class Meta:
+        model = Answer
+        fields = ('id', 'created_by', 'score', 'answer', )
+
+
+class PaginatedCompactAnswerSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = CompactAnswerSerializer
 
 
 class CompactPhotoSerializer(serializers.ModelSerializer):

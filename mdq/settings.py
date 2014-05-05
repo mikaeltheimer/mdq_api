@@ -168,6 +168,9 @@ NEWS_LIKED_PHOTO = 'photo-liked'
 # Story news
 NEWS_LIKED_STORY = 'story-liked'
 
+NEWS_ASKED_QUESTION = 'question-asked'
+NEWS_ANSWERED_QUESTION = 'question-answered'
+
 NEWS_TYPE_CHOICES = (
 
     # Mots-dits news
@@ -181,6 +184,9 @@ NEWS_TYPE_CHOICES = (
 
     # Story news
     (NEWS_LIKED_STORY, 'Liked Story'),
+
+    (NEWS_ASKED_QUESTION, 'Asked a Question'),
+    (NEWS_ANSWERED_QUESTION, 'Answered a Question'),
 
 )
 

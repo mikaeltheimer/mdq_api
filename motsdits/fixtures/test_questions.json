@@ -1,0 +1,17 @@
+[
+    {
+        "fields":     {
+            "action": 1,
+            "approved": true,
+            "created": "2014-04-24T20:24:25",
+            "created_by": 1,
+            "flags": 0,
+            "score": 0.0,
+            "updated": "2014-04-24T20:24:25",
+            "what": 3,
+            "where": 5
+        },
+        "model": "motsdits.question",
+        "pk": 1
+    }
+]
