@@ -1,8 +1,8 @@
 Questions and Answers
 =====================
 
-http://api.motsditsquebec.com/api/v2/questions/
-http://api.motsditsquebec.com/api/v2/answers/
+http://api.motsditsquebec.com/api/v2/questions/ **and** http://api.motsditsquebec.com/api/v2/answers/
+
 
 The Q&A endpoints provide an interface to ask questions and receive mots-dits as answers to those questions
 
