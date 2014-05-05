@@ -9,52 +9,55 @@ Mots-Dits Quebec API Documentation
 This documentation provides coverage of the **master** branch of the MDQ API. All endpoints and interactions described in this document can be assumed to be both **active** and **tested**. Please report any issues to **me@hownowstephen.com**
 
 .. cssclass:: table-striped
-+-----------+-------------------+-----------------------+
-|  Endpoint | General Functions | Interaction Functions |
-+===========+===================+=======================+
-| oauth2_   |                   |                       |
-+-----------+-------------------+-----------------------+
-| auth_     | register          | login                 |
-|           |                   |                       |
-|           |                   | logout                |
-|           |                   |                       |
-+-----------+-------------------+-----------------------+
-| motsdits_ | photos            | like                  |
-|           |                   |                       |
-|           | stories           | favourite             |
-|           |                   |                       |
-|           |                   | flag                  |
-+-----------+-------------------+-----------------------+
-| items_    | related           |                       |
-|           |                   |                       |
-|           | photos            |                       |
-+-----------+-------------------+-----------------------+
-| photos_   |                   | like                  |
-+-----------+-------------------+-----------------------+
-| stories_  |                   | like                  |
-+-----------+-------------------+-----------------------+
-| news_     | comments          |                       |
-+-----------+-------------------+-----------------------+
-| comments_ |                   |                       |
-+-----------+-------------------+-----------------------+
-| users_    | self              | follow                |
-|           |                   |                       |
-|           | news              |                       |
-|           |                   |                       |
-|           | favourites        |                       |
-|           |                   |                       |
-|           | likes             |                       |
-|           |                   |                       |
-|           | followers         |                       |
-|           |                   |                       |
-|           | following         |                       |
-+-----------+-------------------+-----------------------+
++------------+-------------------+-----------------------+
+|  Endpoint  | General Functions | Interaction Functions |
++============+===================+=======================+
+| oauth2_    |                   |                       |
++------------+-------------------+-----------------------+
+| auth_      | register          |                       |
+|            |                   |                       |
+|            |                   |                       |
+|            |                   |                       |
++------------+-------------------+-----------------------+
+| motsdits_  | photos            | like                  |
+|            |                   |                       |
+|            | stories           | favourite             |
+|            |                   |                       |
+|            |                   | flag                  |
++------------+-------------------+-----------------------+
+| questions_ | answers           |                       |
++------------+-------------------+-----------------------+
+| items_     | related           |                       |
+|            |                   |                       |
+|            | photos            |                       |
++------------+-------------------+-----------------------+
+| photos_    |                   | like                  |
++------------+-------------------+-----------------------+
+| stories_   |                   | like                  |
++------------+-------------------+-----------------------+
+| news_      | comments          |                       |
++------------+-------------------+-----------------------+
+| comments_  |                   |                       |
++------------+-------------------+-----------------------+
+| users_     | self              | follow                |
+|            |                   |                       |
+|            | news              |                       |
+|            |                   |                       |
+|            | favourites        |                       |
+|            |                   |                       |
+|            | likes             |                       |
+|            |                   |                       |
+|            | followers         |                       |
+|            |                   |                       |
+|            | following         |                       |
++------------+-------------------+-----------------------+
 
 .. toctree::
     :maxdepth 2
 
     motsdits
     items
+    qa
     photos
     stories
     news
@@ -73,3 +76,4 @@ This documentation provides coverage of the **master** branch of the MDQ API. Al
 .. _news: news.html
 .. _comments: comments.html
 .. _users: users.html
+.. _questions: qa.html
