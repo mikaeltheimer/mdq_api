@@ -415,7 +415,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             )
 
             if created:
-                signals.question_answered.send(request.user.__class__, created_by=request.user, question=question, answer=answer)
+                signals.question_answered.send(request.user.__class__, created_by=request.user, question=question, answer=answer, motdit=motdit)
                 status_code = status.HTTP_201_CREATED
             else:
                 status_code = status.HTTP_200_OK

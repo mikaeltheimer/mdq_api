@@ -477,7 +477,7 @@ class StoryTests(MDQApiTest):
 class NewsTests(MDQApiTest):
     '''Tests for the news API'''
 
-    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_photos.json', 'test_news.json', 'test_comments.json', 'test_stories.json']
+    fixtures = ['test_oauth.json', 'test_accounts.json', 'test_motsdits.json', 'test_photos.json', 'test_news.json', 'test_comments.json', 'test_stories.json', 'test_questions.json']
 
     def test_news_comments(self):
         '''Tests retrieving all comments for a news item'''
@@ -603,6 +603,47 @@ class NewsTests(MDQApiTest):
         ).order_by('-id')[0]
         self.assertEqual(news_item.created_by, self.user)
         self.assertEqual(news_item.story.id, TEST_PK)
+
+    def test_ask_question_news(self):
+        '''Tests that a news item is generated when you ask a question'''
+
+        response = self.client.post('/api/v2/questions/', {
+            'what': 'a poutine',
+            'where': 'montreal',
+            'action': 'eat'
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        question_id = response.data['id']
+
+        news_item = News.objects.filter(
+            action=settings.NEWS_ASKED_QUESTION,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+        self.assertEqual(news_item.created_by, self.user)
+        self.assertEqual(news_item.question.id, question_id)
+
+    def test_answer_question_news(self):
+        '''Tests that a news item is created when you answer a question'''
+
+        TEST_PK = 1
+        ANSWER_MOTDIT = 6
+
+        response = self.client.post('/api/v2/questions/{pk}/answers/'.format(pk=TEST_PK), {
+            'motdit': ANSWER_MOTDIT
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        answer_id = response.data['id']
+
+        news_item = News.objects.filter(
+            action=settings.NEWS_ANSWERED_QUESTION,
+            created__gt=datetime.utcnow() - timedelta(minutes=1)
+        ).order_by('-id')[0]
+        self.assertEqual(news_item.created_by, self.user)
+        self.assertEqual(news_item.answer.id, answer_id)
+        self.assertEqual(news_item.question.id, TEST_PK)
+        self.assertEqual(news_item.motdit.id, ANSWER_MOTDIT)
 
 
 class CommentTests(MDQApiTest):
