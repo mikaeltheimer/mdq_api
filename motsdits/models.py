@@ -87,7 +87,8 @@ class MotDit(MDQBaseModel):
         'updated': datetime,
         'name': str,
         'likes': Count('likes'),
-        'favourites': Count('favourites')
+        'favourites': Count('favourites'),
+        'score': int
     }
 
     action = models.ForeignKey(Action)
