@@ -5,7 +5,7 @@
 
 from django.conf import settings
 from django.db.models import Count, Q
-from motsdits.models import MotDit
+from motsdits.models import Action, MotDit
 
 
 def geonear(queryset, lat, lng, distance=100):
@@ -29,6 +29,11 @@ def geonear(queryset, lat, lng, distance=100):
 
 def sort(request, queryset):
     '''Sorts the queryset using the supplied request and sort keys'''
+
+    if queryset.model == MotDit:
+        if request.QUERY_PARAMS.get('action'):
+            action = Action.objects.get(verb=request.QUERY_PARAMS.get('action'))
+            queryset = queryset.filter(action=action)
 
     if hasattr(queryset.model, 'sort_keys') and request.QUERY_PARAMS.get('order_by') in queryset.model.sort_keys:
         sort_key = request.QUERY_PARAMS.get('order_by')
