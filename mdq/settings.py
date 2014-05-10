@@ -23,6 +23,9 @@ SECRET_KEY = '362-qtrxq#-o)i^tt(fc_$#^%4)wzxy)tvfxn!ynp*^n_3k%l+'
 DEBUG = True
 
 TEMPLATE_DEBUG = True
+TEMPLATE_DIRS = (
+    BASE_DIR + '/templates/'
+)
 
 ALLOWED_HOSTS = []
 
@@ -43,7 +46,7 @@ INSTALLED_APPS = (
     'provider.oauth2',
     'django_filters',
     #'rest_framework.authtoken', # enable when setting up token-based authentication
-    #'haystack',
+    'haystack',
 
     # Admin plugins
     #'suit',
@@ -91,6 +94,15 @@ DATABASES = {
         'PASSWORD': 'goose',
         'OPTIONS': {'init_command': 'SET storage_engine=INNODB'},  # Improve performance once DB is settled by removing this
     }
+}
+
+# Search settings
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://es.motsditsquebec.com:9200/',    # es.motsditsquebec.com
+        'INDEX_NAME': 'haystack',
+    },
 }
 
 # Internationalization

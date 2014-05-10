@@ -161,8 +161,69 @@ Mot-dit Stories
 This endpoint provides a **paginated** list of story_ objects that are related to this specific Mot-dit. See the story_ documentation for a full list of query parameters available
 
 
+Searching for Mots-Dits
+-----------------------
+
+**GET** http://api.motsditsquebec.com/api/v2/motsdits/search/
+
+The Mot-Dit search endpoint integrates searching via haystack_, using the elasticsearch_ backend. This queries directly the elasticsearch database at http://es.motsditsquebec.com/. Searches currently search for matches on the following fields:
+
++-------------+-----------------------------------+
+|    Field    |            Description            |
++=============+===================================+
+| **what**    | The full value of the what field  |
++-------------+-----------------------------------+
+| **where**   | The full value of the where field |
++-------------+-----------------------------------+
+| **action**  | The action verb                   |
++-------------+-----------------------------------+
+| **address** | The address of the where field    |
++-------------+-----------------------------------+
+| **website** | The website of the where field    |
++-------------+-----------------------------------+
+| **tags**    | All the tags on this motdit       |
++-------------+-----------------------------------+
+
+Search results are paginated, and each result looks like the following:
+
+.. code-block:: javascript
+
+    {
+        "motdit": {
+            "id": 8, 
+            "created_by": {
+                "id": 1, 
+                "username": "admin"
+            }, 
+            "action": "eat", 
+            "what": {
+                "id": 3, 
+                "name": "awesome lunch", 
+                "score": 0.0
+            }, 
+            "where": {
+                "id": 2, 
+                "name": "test where", 
+                "score": 0.0
+            }, 
+            "score": 0.0, 
+            "likes": 0, 
+            "favourites": 0, 
+            "tags": [
+                "vegan", 
+                "daily", 
+                "healthy"
+            ], 
+            "user_likes": false
+        }, 
+        "score": 0.16608897
+    }
+
+Where the motdit is a standard serialized motdit object, as above, and the score is the **search engine ranking score**, which is a relative value from 0 to 1 representing how good the match was (where 1 is a perfect match)
 
 .. _item: items.html
 .. _photo: photos.html
 .. _story: stories.html
 .. _above: #Listing Mots-Dits
+.. _haystack: http://django-haystack.readthedocs.org/en/latest/
+.. _elasticsearch: http://www.elasticsearch.org/

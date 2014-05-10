@@ -59,6 +59,24 @@ class PaginatedMotDitSerializer(pagination.PaginationSerializer):
         object_serializer_class = MotDitSerializer
 
 
+class MotDitSearchSerializer(serializers.Serializer):
+
+    motdit = serializers.SerializerMethodField('_motdit')
+    score = serializers.SerializerMethodField('_score')
+
+    def _motdit(self, obj):
+        '''Relay down to the search result's object'''
+        return MotDitSerializer(obj.object, many=False, context=self.context).data
+
+    def _score(self, obj):
+        return obj.score
+
+
+class PaginatedMotDitSearchSerializer(pagination.PaginationSerializer):
+    class Meta:
+        object_serializer_class = MotDitSearchSerializer
+
+
 class ItemSerializer(serializers.ModelSerializer):
     '''Ensures that related objects get serialized'''
 

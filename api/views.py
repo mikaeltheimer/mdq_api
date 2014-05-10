@@ -9,16 +9,17 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 from django.core.validators import EmailValidator, ValidationError
-from django.core.urlresolvers import reverse, resolve
+from django.core.urlresolvers import reverse
 
 # Django plugins
 from rest_framework import viewsets, status
 from rest_framework.decorators import link, action
 from rest_framework.permissions import AllowAny
 import rest_framework.filters
-from rest_framework.request import clone_request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from haystack.query import SearchQuerySet
 
 from motsdits.models import Action, Item, MotDit, Question, Answer, Tag, Photo, Story, News, Comment
 from motsdits import signals
@@ -272,7 +273,6 @@ class MotDitViewSet(viewsets.ModelViewSet):
     @link()
     def photos(self, request, pk=None):
         '''Retrieves a list of photos related to this item'''
-        # @TODO: Add pagination
         serializer = motsdits_compact.PaginatedCompactPhotoSerializer
 
         queryset = sorting.sort(request, Photo.objects.filter(motdit=pk))
@@ -283,7 +283,6 @@ class MotDitViewSet(viewsets.ModelViewSet):
     @link()
     def stories(self, request, pk=None):
         '''Retrieves a list of stories related to this item'''
-        # @TODO: Add pagination
         serializer = motsdits_compact.PaginatedCompactStorySerializer
 
         queryset = sorting.sort(request, Story.objects.filter(motdit=pk))
@@ -799,3 +798,20 @@ class UserValidate(APIView):
             return Response({'success': False, 'message': 'Invalid validation code'}, status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             return Response({'success': False, 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MotDitSearch(APIView):
+    '''Searches through mots-dits'''
+
+    serializer = motsdits_serializers.PaginatedMotDitSearchSerializer
+
+    def get(self, request):
+        '''Gets a set of mot-dit search results from haystack'''
+
+        # try:
+        queryset = SearchQuerySet().filter(content=request.QUERY_PARAMS.get('q'))
+        objects = get_paginated(request, queryset)
+
+        return Response(self.serializer(objects, context={'request': request}).data)
+        # except Exception as e:
+        #     return Response({'success': False, 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

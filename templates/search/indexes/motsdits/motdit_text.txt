@@ -1,0 +1,8 @@
+{{ object.what.name }}
+{{ object.action.verb }}
+{{ object.where.name }}
+{{ object.where.address }}
+{{ object.where.website }}
+{% for tag in object.tags %}
+    {{ tag.name }}
+{% endfor %}
