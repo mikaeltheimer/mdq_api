@@ -164,7 +164,7 @@ This endpoint provides a **paginated** list of story_ objects that are related t
 Searching for Mots-Dits
 -----------------------
 
-**GET** http://api.motsditsquebec.com/api/v2/motsdits/search/
+**GET** http://api.motsditsquebec.com/api/v2/motsdits/search/?q=SEARCH
 
 The Mot-Dit search endpoint integrates searching via haystack_, using the elasticsearch_ backend. This queries directly the elasticsearch database at http://es.motsditsquebec.com/. Searches currently search for matches on the following fields:
 
