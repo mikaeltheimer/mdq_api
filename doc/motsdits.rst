@@ -102,6 +102,28 @@ Retrieving Mots-dits
 
 Retrieves a mot-dit by ID, with the fields above_
 
+Updating a Mots-dit
+-------------------
+
+**PATCH** http://api.motsditsquebec.com/api/v2/motsdits/:ID/
+
+Sending a patch request allows you to partially update a mot-dit, supplying one of the following fields:
+
++-------------+----------------------------------------------------------------------------------------------+-----------+
+|  Attribute  |                                         Description                                          |           |
++=============+==============================================================================================+===========+
+| **address** | The address of the **where** item                                                            |           |
++-------------+----------------------------------------------------------------------------------------------+-----------+
+| **website** | The website of the **where** item                                                            |           |
++-------------+----------------------------------------------------------------------------------------------+-----------+
+
+.. code-block:: javascript
+
+    {
+        'address': '1234 fake street',
+        'website': 'http://fakeplace.com'
+    }
+
 
 Liking and Favouriting Mots-dits
 --------------------------------
