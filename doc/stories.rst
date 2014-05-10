@@ -24,6 +24,8 @@ Stories have the following attributes:
 +----------------+--------------------------------------------------------+-------------------------------+
 | **score**      | The overall static score_ that this story has received |                               |
 +----------------+--------------------------------------------------------+-------------------------------+
+| **photo**      | A photo_ that was shared with this story               | Optional                      |
++----------------+--------------------------------------------------------+-------------------------------+
 
 And support the following filters:
 

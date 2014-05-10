@@ -95,6 +95,8 @@ A simple example of creating a mot-dit would be:
 
 **note**: tags can be supplied as either a list (when POSTing in JSON) or a comma-separated string (when using multipart/form-data)
 
+**note**: If you create **both** a story_ and a photo_ when creating a motdit, these two will be linked
+
 Retrieving Mots-dits
 --------------------
 

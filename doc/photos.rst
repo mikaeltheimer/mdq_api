@@ -24,6 +24,8 @@ Photos have the following attributes:
 +----------------+--------------------------------------------------------+-------------------------------+
 | **score**      | The overall static score_ that this story has received |                               |
 +----------------+--------------------------------------------------------+-------------------------------+
+| **story**      | A story_ that was shared with this photo               | Optional                      |
++----------------+--------------------------------------------------------+-------------------------------+
 
 And support the following filters:
 
@@ -76,3 +78,4 @@ This will delete a like on a photo. It will always succeed, even if the user doe
 .. _motsdits: motsdits.html
 .. _score: scores.html
 .. _photo: photos.html
+.. _story: stories.html
