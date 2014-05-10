@@ -134,6 +134,7 @@ class PhotoSerializer(serializers.ModelSerializer):
     created_by = accounts_compact.CompactUserSerializer()
 
     user_likes = serializers.SerializerMethodField('does_user_like')
+    story = motsdits_compact.PhotoStorySerializer()
 
     def get_picture_url(self, obj):
         '''Gets the url of the actual picture object'''
@@ -142,7 +143,7 @@ class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
         depth = 1
-        fields = ('id', 'url', 'created_by', 'motdit', 'user_likes')
+        fields = ('id', 'url', 'created_by', 'motdit', 'user_likes', 'story', )
 
     def does_user_like(self, obj):
         '''Check if the user likes this object'''
@@ -161,11 +162,12 @@ class StorySerializer(serializers.ModelSerializer):
     motdit = MotDitSerializer()
     created_by = accounts_compact.CompactUserSerializer()
     user_likes = serializers.SerializerMethodField('does_user_like')
+    photo = motsdits_compact.StoryPhotoSerializer()
 
     class Meta:
         model = Story
         depth = 1
-        fields = ('id', 'text', 'created_by', 'motdit', 'user_likes', )
+        fields = ('id', 'text', 'created_by', 'motdit', 'user_likes', 'photo', )
 
     def does_user_like(self, obj):
         '''Check if the user likes this object'''

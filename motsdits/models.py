@@ -157,6 +157,7 @@ class Story(MDQBaseModel):
 
     text = models.TextField()
     motdit = models.ForeignKey(MotDit, related_name='stories')
+    photo = models.OneToOneField(Photo, null=True, blank=True)
 
     @property
     def teaser(self):

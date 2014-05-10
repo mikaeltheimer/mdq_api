@@ -181,16 +181,6 @@ def create_motdit(request, data, serializer_class=motsdits_serializers.MotDitSer
             else:
                 raise ValueError('Tags must be supplied as a list or comma separated string')
 
-            # Create story, if supplied
-            if data.get('story'):
-                story = Story.objects.create(
-                    motdit=motdit,
-                    text=data['story'],
-                    created_by=request.user
-                )
-            else:
-                story = None
-
             # Add a photo, if supplied
             if request.FILES.get('photo'):
                 # Create the photo
@@ -201,6 +191,17 @@ def create_motdit(request, data, serializer_class=motsdits_serializers.MotDitSer
                 )
             else:
                 photo = None
+
+            # Create story, if supplied
+            if data.get('story'):
+                story = Story.objects.create(
+                    motdit=motdit,
+                    text=data['story'],
+                    created_by=request.user,
+                    photo=photo
+                )
+            else:
+                story = None
 
             # Finally, dispatch the creation signal
             signals.motdit_created.send(request.user.__class__, created_by=request.user, motdit=motdit, photo=photo, story=story)

@@ -79,6 +79,22 @@ class PaginatedCompactAnswerSerializer(pagination.PaginationSerializer):
         object_serializer_class = CompactAnswerSerializer
 
 
+class PhotoStorySerializer(serializers.ModelSerializer):
+    '''A Story serializer specific to the story/photo relationship'''
+
+    created_by = compact.CompactUserSerializer()
+    user_likes = serializers.SerializerMethodField('does_user_like')
+
+    class Meta:
+        model = Story
+        fields = ('id', 'text', 'created_by', 'score', 'user_likes', )
+
+    def does_user_like(self, obj):
+        '''Check if the user likes this object'''
+        if self.context.get('request'):
+            return self.context['request'].user in obj.likes.all()
+
+
 class CompactPhotoSerializer(serializers.ModelSerializer):
     '''Creates a smaller version of a Photo object'''
 
@@ -86,6 +102,7 @@ class CompactPhotoSerializer(serializers.ModelSerializer):
     created_by = compact.CompactUserSerializer()
 
     user_likes = serializers.SerializerMethodField('does_user_like')
+    story = PhotoStorySerializer()
 
     def get_picture_url(self, obj):
         '''Gets the url of the actual picture object'''
@@ -93,7 +110,7 @@ class CompactPhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ('id', 'url', 'created_by', 'score', 'motdit', 'user_likes')
+        fields = ('id', 'url', 'created_by', 'score', 'motdit', 'user_likes', 'story')
 
     def does_user_like(self, obj):
         '''Check if the user likes this object'''
@@ -106,15 +123,24 @@ class PaginatedCompactPhotoSerializer(pagination.PaginationSerializer):
         object_serializer_class = CompactPhotoSerializer
 
 
+class StoryPhotoSerializer(CompactPhotoSerializer):
+    '''A photo serializer specific to the story/photo relationship'''
+
+    class Meta:
+        model = Photo
+        fields = ('id', 'url', 'created_by', 'score', 'user_likes', )
+
+
 class CompactStorySerializer(serializers.ModelSerializer):
     '''Creates a smaller version of a Story object'''
 
     created_by = compact.CompactUserSerializer()
     user_likes = serializers.SerializerMethodField('does_user_like')
+    photo = StoryPhotoSerializer()
 
     class Meta:
         model = Story
-        fields = ('id', 'text', 'created_by', 'score', 'motdit', 'user_likes', )
+        fields = ('id', 'text', 'created_by', 'score', 'motdit', 'user_likes', 'photo', )
 
     def does_user_like(self, obj):
         '''Check if the user likes this object'''
