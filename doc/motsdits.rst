@@ -50,6 +50,8 @@ Motsdits are loaded in a paginated list, and requests can be filtered using GET 
 +--------------+---------------------------------------------------------------------------------------------------------------------+
 | **radius**   | **used only with nearby** Sets the radius to search (default: 100km)                                                |
 +--------------+---------------------------------------------------------------------------------------------------------------------+
+| **action**   | Action of the mots-dits to return, if specified must be the exact action name                                       |
++--------------+---------------------------------------------------------------------------------------------------------------------+
 
 **Note**: You may only use **one** of **order_by** or **nearby**. If **order_by** is specified, **nearby** will be ignored.
 
