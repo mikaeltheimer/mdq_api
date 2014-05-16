@@ -19,7 +19,7 @@ import rest_framework.filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from haystack.query import SearchQuerySet
+from haystack.query import SearchQuerySet, SQ
 
 from motsdits.models import Action, Item, MotDit, Question, Answer, Tag, Photo, Story, News, Comment
 from motsdits import signals
@@ -808,8 +808,10 @@ class MotDitSearch(APIView):
     def get(self, request):
         '''Gets a set of mot-dit search results from haystack'''
 
+        query = request.QUERY_PARAMS.get('q')
+
         # try:
-        queryset = SearchQuerySet().filter(content=request.QUERY_PARAMS.get('q'))
+        queryset = SearchQuerySet().filter(SQ(content=query) | SQ(stories=query))
         objects = get_paginated(request, queryset)
 
         return Response(self.serializer(objects, context={'request': request}).data)
