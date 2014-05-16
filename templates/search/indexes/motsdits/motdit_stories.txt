@@ -1,0 +1,3 @@
+{% for story in object.stories.all %}
+    {{ story.text }}
+{% endfor %}
