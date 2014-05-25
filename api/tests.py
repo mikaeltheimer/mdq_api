@@ -1,3 +1,4 @@
+# coding: utf-8
 # from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -181,6 +182,23 @@ class MotDitTests(MDQApiTest):
             'where': 'vieux port steakhouse',
             'action': 'eat',
             'tags': ['brunch', 'sunday'],
+            'story': my_story
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        story = Story.objects.get(motdit__pk=response.data['id'])
+        self.assertEqual(story.text, my_story)
+
+    def test_create_motdit_with_story_and_accents(self):
+        '''Ensures that we can create a motdit with a story'''
+
+        my_story = u"J'ai mangé plein d'affaires"
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'du vélo',
+            'where': 'velodrome',
+            'action': 'eat',
+            'tags': ['weekend', 'activité', 'bon workout'],
             'story': my_story
         }, format='json')
 
