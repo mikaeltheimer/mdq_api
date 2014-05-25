@@ -168,6 +168,8 @@ REST_FRAMEWORK = {
 
 }
 
+OAUTH_DELETE_EXPIRED = True
+
 # Mots-dits news
 NEWS_CREATED_MOTDIT = 'motdit-created'
 NEWS_UPDATED_MOTDIT = 'motdit-updated'

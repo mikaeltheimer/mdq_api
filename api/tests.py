@@ -207,6 +207,18 @@ class MotDitTests(MDQApiTest):
         story = Story.objects.get(motdit__pk=response.data['id'])
         self.assertEqual(story.text, my_story)
 
+    def test_create_motdit_anon(self):
+        '''Ensures that we can create a motdit with a story'''
+
+        response = self.client.post_anon('/api/v2/motsdits/', {
+            'what': 'pizza',
+            'where': 'pizzatown',
+            'action': 'eat',
+            'tags': ['pizza', 'town'],
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_create_motdit_with_photo(self):
         '''Ensures we can create a motdit with a photo'''
 

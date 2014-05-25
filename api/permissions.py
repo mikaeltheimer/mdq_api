@@ -33,4 +33,4 @@ class DefaultPermissions(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        return request.user and request.user.validated
+        return request.user and not request.user.is_anonymous() and request.user.validated
