@@ -69,9 +69,9 @@ class Item(MDQBaseModel):
     # Tags related to this specific item
     tags = models.ManyToManyField(Tag, null=True, blank=True)
 
-    def __str__(self):
+    def __unicode__(self):
         '''Display version'''
-        return "({}) {}".format(self.type, self.name)
+        return u"({}) {}".format(self.type, self.name)
 
     @property
     def motsdits(self):
@@ -96,9 +96,9 @@ class MotDit(MDQBaseModel):
     what = models.ForeignKey(Item, related_name='what', null=True)
     where = models.ForeignKey(Item, related_name='where', null=True)
 
-    def __str__(self):
+    def __unicode__(self):
         '''Stringified version'''
-        return "{} {} at {}".format(self.action, self.what, self.where)
+        return u"{} {} at {}".format(self.action, self.what, self.where)
 
     @property
     def favourites(self):
@@ -182,8 +182,8 @@ class News(MDQBaseModel):
     question = models.ForeignKey(Question, null=True, blank=True, related_name='news_about')
     answer = models.ForeignKey(Answer, null=True, blank=True, related_name='news_about')
 
-    def __str__(self):
-        return str(self.action)
+    def __unicode__(self):
+        return unicode(self.action)
 
 
 class Comment(MDQBaseModel):
@@ -205,5 +205,5 @@ class Comment(MDQBaseModel):
         else:
             return self.text[:40] + '...'
 
-    def __str__(self):
+    def __unicode__(self):
         return self.teaser
