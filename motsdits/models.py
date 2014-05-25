@@ -171,6 +171,13 @@ class Story(MDQBaseModel):
 class News(MDQBaseModel):
     '''News item'''
 
+    sort_keys = {
+        'created': datetime,
+        'updated': datetime,
+        'likes': Count('likes'),
+        'score': int
+    }
+
     action = models.CharField(max_length=50, choices=settings.NEWS_TYPE_CHOICES)
 
     # And related models
