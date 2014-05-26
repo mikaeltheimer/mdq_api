@@ -158,7 +158,7 @@ class CompactNewsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = News
-        fields = ('id', 'action', 'created_by', 'score', )
+        fields = ('id', 'action', 'created_by', 'created', 'score', )
 
 
 class PaginatedCompactNewsSerializer(pagination.PaginationSerializer):

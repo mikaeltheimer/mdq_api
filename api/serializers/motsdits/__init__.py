@@ -209,7 +209,7 @@ class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         depth = 1
-        fields = ('id', 'motdit', 'photo', 'story', 'created_by', 'action', )
+        fields = ('id', 'motdit', 'photo', 'story', 'created_by', 'action', 'created', )
 
 
 class PaginatedNewsSerializer(pagination.PaginationSerializer):
