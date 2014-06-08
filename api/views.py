@@ -738,6 +738,10 @@ class UserSelf(APIView):
                     raise ValidationError('last_name must be a string, not {}'.format(type(request.DATA['last_name'])))
                 request.user.last_name = request.DATA['last_name']
 
+            if 'avatar' in request.FILES:
+                request.user.avatar = request.FILES['avatar']
+
+
             # Finally, save the user
             request.user.save()
 
@@ -769,6 +773,10 @@ class UserRegister(APIView):
 
                     # Set the password (ensures it gets hashed properly)
                     user.set_password(request.DATA['password'])
+
+                    # Add a photo, if supplied
+                    if request.FILES.get('avatar'):
+                        user.avatar = request.FILES['avatar']
 
                     if 'fb_token' in request.DATA:
                         user.fb_token = request.DATA['fb_token']
@@ -826,10 +834,7 @@ class MotDitSearch(APIView):
 
         query = request.QUERY_PARAMS.get('q')
 
-        # try:
         queryset = SearchQuerySet().filter(SQ(content=query) | SQ(stories=query))
         objects = get_paginated(request, queryset)
 
         return Response(self.serializer(objects, context={'request': request}).data)
-        # except Exception as e:
-        #     return Response({'success': False, 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

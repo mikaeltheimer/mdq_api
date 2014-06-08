@@ -814,6 +814,18 @@ class UserTests(MDQApiTest):
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_set_avatar(self):
+
+        # And invalid last name setting
+        with open('../data/auxvivres.jpg') as testfile:
+            response = self.client.patch('/api/v2/users/self', {
+                'avatar': testfile
+            }, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            user = get_user_model().objects.get(pk=self.user.pk)
+            self.assertNotEqual(user.avatar, None)
+
     def test_registration_create(self):
         '''Tests the user registration flow'''
 
@@ -892,6 +904,26 @@ class UserTests(MDQApiTest):
         valid_user = get_user_model().objects.get(pk=user_id)
         self.assertTrue(valid_user.validated)
         self.assertTrue(valid_user.is_active)
+
+    def test_registration_avatar(self):
+        '''Tests the user registration flow'''
+
+        # Test creating a user w/ avatar
+        with open('../data/auxvivres.jpg') as testfile:
+            response = self.client.post_anon('/api/v2/users/register', {
+                'email': 'unused@motsditsquebec.com',
+                'username': 'mr_unused',
+                'password': '123456',
+                'first_name': 'test',
+                'last_name': 'user',
+                'send_email': False,
+                'avatar': testfile
+            }, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+            user = get_user_model().objects.get(pk=response.data['id'])
+            self.assertNotEqual(user.avatar, None)
+            # @TODO: Compare to the testfile value
 
 
 class QuestionTests(MDQApiTest):
