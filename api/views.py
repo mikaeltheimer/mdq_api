@@ -770,6 +770,9 @@ class UserRegister(APIView):
                     # Set the password (ensures it gets hashed properly)
                     user.set_password(request.DATA['password'])
 
+                    if 'fb_token' in request.DATA:
+                        user.fb_token = request.DATA['fb_token']
+
                     user.full_clean()
                     user.save()
                 except (ValidationError, KeyError) as e:
