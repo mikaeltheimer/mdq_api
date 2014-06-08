@@ -32,6 +32,7 @@ from api.serializers.motsdits import motsdits_compact
 # Pagination helper function
 from pagination import get_paginated
 import sorting
+import re
 
 
 class ItemViewSet(viewsets.ModelViewSet):
@@ -79,6 +80,12 @@ class ItemAutocomplete(APIView):
         return Response([item.name for item in Item.objects.filter(name__icontains=name)[:10]])
 
 
+def normalize_item_value(value):
+    '''Normalizes the value of an item - strips off articles and whitespace'''
+    value = re.sub('^(un|une|des|le|la|les|a|en|au) ', '', value, flags=re.I)
+    return value.strip()
+
+
 def resolve_item(value, item_type, user=None, address=None, website=None):
     '''Given a value supplied to the API, resolve it to a discrete Item object'''
 
@@ -89,8 +96,10 @@ def resolve_item(value, item_type, user=None, address=None, website=None):
     elif value is not None:
         # Pre-clean the value
         value = value.strip()
+        normalized = normalize_item_value(value)
+
         try:
-            item = Item.objects.get(type=item_type, name__iexact=value)
+            item = Item.objects.get(type=item_type, name__iexact=normalized)
 
             # Add address and website, if available
             if address and not item.address:
@@ -98,12 +107,16 @@ def resolve_item(value, item_type, user=None, address=None, website=None):
             if website and not item.website:
                 item.website = website
 
+            if value != normalized and not item.display_name:
+                item.display_name = value
+
             item.save()
 
         except Item.DoesNotExist:
             item = Item.objects.create(
                 type=item_type,
-                name=value,
+                name=normalized,
+                display_name=value if value != normalized else None,
                 created_by=user,
                 address=address,
                 website=website

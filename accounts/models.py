@@ -42,6 +42,8 @@ class MDQUser(AbstractBaseUser):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
 
+    fb_token = models.CharField(max_length=255, null=True, blank=True)
+
     # Access control information
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)

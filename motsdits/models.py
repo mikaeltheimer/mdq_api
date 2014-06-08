@@ -57,6 +57,7 @@ class Item(MDQBaseModel):
 
     # Name of the item
     name = models.CharField(max_length=255)
+    display_name = models.CharField(max_length=255, null=True, blank=True)
 
     # Geo information
     address = models.TextField(null=True, blank=True)

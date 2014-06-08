@@ -395,6 +395,27 @@ class MotDitTests(MDQApiTest):
         motdit = MotDit.objects.get(pk=1)
         self.assertNotIn(self.user, motdit.favourites.all())
 
+    def test_motdit_combine(self):
+        '''Ensure mots-dits get properly combined when created'''
+
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'a poutine',
+            'where': 'la banquise',
+            'action': 'eat',
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        motdit1 = response.data['id']
+
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'poutine',
+            'where': 'banquise',
+            'action': 'eat',
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['id'], motdit1)
+
 
 class PhotoTests(MDQApiTest):
     '''Tests for the photo API'''
