@@ -68,11 +68,18 @@ question_answered = Signal(providing_args=["created_by", "question", "answer"])
 def handle_create_motdit(created_by=None, motdit=None, photo=None, story=None, **kwargs):
     '''Handles creation of a motdit, increases score + generates a news item'''
 
+    created_before = News.objects.filter(
+        action=settings.NEWS_CREATED_MOTDIT,
+        created_by=created_by,
+        motdit=motdit
+    ).count()
+
     if created_by and motdit:
         News.objects.create(action=settings.NEWS_CREATED_MOTDIT, created_by=created_by, motdit=motdit, story=story, photo=photo)
 
         # and update the motdit score
-        motdit.score += 1
+        if not created_before:
+            motdit.score += 1
         motdit.save()
 
 

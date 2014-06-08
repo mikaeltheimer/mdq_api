@@ -11,20 +11,24 @@ Listing Users
 
 **GET** http://api.motsditsquebec.com/api/v2/users/
 
-Users have the following attributes:
+Users have the following attributes (all required, unless otherwise stated):
 
-+----------------+------------------------+-------------+
-|  **username**  |   A unique username    |             |
-+----------------+------------------------+-------------+
-| **first_name** | First name of the user | **private** |
-+----------------+------------------------+-------------+
-| **last_name**  | Last name of the user  | **private** |
-+----------------+------------------------+-------------+
-| **email**      | User email address     | **private** |
-+----------------+------------------------+-------------+
++----------------+------------------------------------------+----------------------------+
+|  **username**  |            A unique username             |                            |
++----------------+------------------------------------------+----------------------------+
+| **avatar**     | A URL to a picture representing the user | (not required)             |
++----------------+------------------------------------------+----------------------------+
+| **fb_token**   | The user's facebook access token         | (not required) **private** |
++----------------+------------------------------------------+----------------------------+
+| **first_name** | First name of the user                   | **private**                |
++----------------+------------------------------------------+----------------------------+
+| **last_name**  | Last name of the user                    | **private**                |
++----------------+------------------------------------------+----------------------------+
+| **email**      | User email address                       | **private**                |
++----------------+------------------------------------------+----------------------------+
 
-Creating Users (under development)
-----------------------------------
+Creating Users
+--------------
 
 **POST** http://api.motsditsquebec.com/api/v2/users/
 
@@ -37,7 +41,8 @@ Your POST data should look like:
         "email": "testuser@motsditsquebec.com",
         "password": "plaintext_password",
         "first_name": "Test",
-        "last_name": "User"
+        "last_name": "User",
+        "avatar": <attached photo>
     }
 
 Logging in and out

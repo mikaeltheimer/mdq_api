@@ -303,6 +303,16 @@ class MotDitViewSet(viewsets.ModelViewSet):
 
         return Response(serializer(stories, context={'request': request}).data)
 
+    @link()
+    def news(self, request, pk=None):
+        '''Retrieves a list of news related to this item'''
+        serializer = motsdits_compact.PaginatedCompactNewsSerializer
+
+        queryset = sorting.sort(request, News.objects.filter(motdit=pk))
+        stories = get_paginated(request, queryset)
+
+        return Response(serializer(stories, context={'request': request}).data)
+
     def create(self, request):
         '''Create a MotDit object'''
         return create_motdit(request, request.DATA, serializer_class=self.serializer_class)

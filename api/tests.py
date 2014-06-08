@@ -375,6 +375,16 @@ class MotDitTests(MDQApiTest):
         for story in response.data['results']:
             self.assertEqual(story.motdit, 1)
 
+    def test_motdit_news(self):
+        '''Tests listing of news for a motdit'''
+
+        response = self.client.get('/api/v2/motsdits/1/news/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Make sure it only returns news for MotDit #1
+        for news in response.data['results']:
+            self.assertEqual(news.motdit, 1)
+
     def test_favourite_motdit(self):
         '''Performs a "like" of the mot-dit by the admin user'''
 
@@ -415,6 +425,26 @@ class MotDitTests(MDQApiTest):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['id'], motdit1)
+
+    def test_motdit_score(self):
+        '''Create a motdit and make sure it only scores once'''
+
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'la trattoria',
+            'action': 'eat',
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        score = MotDit.objects.get(pk=response.data['id']).score
+
+        response = self.client.post('/api/v2/motsdits/', {
+            'what': 'la trattoria',
+            'action': 'eat',
+        }, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(MotDit.objects.get(pk=response.data['id']).score, score)
 
 
 class PhotoTests(MDQApiTest):

@@ -163,6 +163,14 @@ Mot-dit Stories
 This endpoint provides a **paginated** list of story_ objects that are related to this specific Mot-dit. See the story_ documentation for a full list of query parameters available
 
 
+Mot-dit News
+------------
+
+**GET** http://api.motsditsquebec.com/api/v2/motsdits/:ID/news/
+
+This endpoint provides a **paginated** list of news_ objects that are related to this specific Mot-dit. See the news_ documentation for a full list of query parameters available
+
+
 Searching for Mots-Dits
 -----------------------
 
