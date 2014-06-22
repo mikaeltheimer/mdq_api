@@ -29,6 +29,7 @@ class CompactMotDitSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField('count_likes')
     favourites = serializers.SerializerMethodField('count_favourites')
     user_likes = serializers.SerializerMethodField('does_user_like')
+    user_favourited = serializers.SerializerMethodField('does_user_favourite')
 
     class Meta:
         model = MotDit
@@ -37,13 +38,18 @@ class CompactMotDitSerializer(serializers.ModelSerializer):
             'id',
             'action', 'what', 'where',
             'score', 'likes', 'favourites',
-            'user_likes'
+            'user_likes', 'user_favourited'
         )
 
     def does_user_like(self, obj):
         '''Check if the user likes this object'''
         if self.context.get('request'):
             return self.context['request'].user in obj.likes.all()
+
+    def does_user_favourite(self, obj):
+        '''Check if the user likes this object'''
+        if self.context.get('request'):
+            return self.context['request'].user in obj.favourites.all()
 
     def count_favourites(self, obj):
         '''Return the count of users that have favourited this motdit'''
