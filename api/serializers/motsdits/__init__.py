@@ -30,7 +30,7 @@ class MotDitSerializer(serializers.ModelSerializer):
             'id', 'created_by',
             'action', 'what', 'where',
             'score', 'likes', 'favourites',
-            'tags', 'user_likes'
+            'tags', 'user_likes', 'user_favourited'
         )
 
     def does_user_like(self, obj):
